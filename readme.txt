@@ -19,6 +19,12 @@ Total Slider allows you to create a number of ‘slide groups’. Each slide in 
 Once this plugin is installed and activated, use the Slider tab in your WordPress dashboard to assemble a group of slides with text, backgrounds and so on. You can then have the slides show up on any page of your site using the Total Slider widget.
 
 Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widget to the correct area. Then, simply select the slide group to show in this area of your site.
+
+= Key links =
+
+* [User Docs](http://www.vanpattenmedia.com/project/total-slider/docs)
+* [Developer Docs](https://github.com/vanpattenmedia/total-slider/wiki)
+* [License](http://www.vanpattenmedia.com/project/total-slider/license/)
 	
 == Installation ==
 
@@ -26,6 +32,15 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 2. Activate the plugin on the **Plugins** page of your dashboard.
 3. Click **Slider** in the admin menu and get started on your first slide group!
 
+== Screenshots ==
+
+1. The slide groups screen.
+2. Creating a new slide group is easy: just give it a name.
+3. Getting started on a new slide group.
+4. Make changes to the slide, and see the preview update in real time.
+5. Use the standard WordPress uploader to set your background image.
+6. Position the title and description anywhere over the background with drag and drop.
+7. Link the slide to a page or post on your site easily.
 
 == Changelog ==
 
