@@ -10,7 +10,7 @@ Transform your experience with sliders forever. A beautiful, true WYSIWYG interf
 
 == Description ==
 
-**Total Slider** is a plugin for WordPress from Van Patten Media that will transform your experience with sliders forever. Build your own templates in PHP and CSS, then preview the output in a beautiful WYSIWYG interface designed to blend seamlessly with the WordPress core.
+**[Total Slider](http://www.totalslider.com/)** is a plugin for WordPress from Van Patten Media that will transform your experience with sliders forever. Build your own templates in PHP and CSS, then preview the output in a beautiful WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
 = How it works =
 
@@ -25,6 +25,7 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * [User Docs](http://www.vanpattenmedia.com/project/total-slider/docs)
 * [Developer Docs](https://github.com/vanpattenmedia/total-slider/wiki)
 * [License](http://www.vanpattenmedia.com/project/total-slider/license/)
+* [TotalSlider.com](http://www.totalslider.com)
 	
 == Installation ==
 
