@@ -22,10 +22,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 = Key links =
 
+* [TotalSlider.com](http://www.totalslider.com)
 * [User Docs](http://www.vanpattenmedia.com/project/total-slider/docs)
 * [Developer Docs](https://github.com/vanpattenmedia/total-slider/wiki)
 * [License](http://www.vanpattenmedia.com/project/total-slider/license/)
-* [TotalSlider.com](http://www.totalslider.com)
 	
 == Installation ==
 
