@@ -3,7 +3,7 @@
 Plugin Name: Total Slider
 Plugin URI: http://www.totalslider.com/
 Description: The best experience for building sliders, with true WYSIWYG, drag & drop and more!
-Version: 1.0
+Version: 1.0.1
 Author: Peter Upfold
 Author URI: http://www.vanpattenmedia.com/
 License: GPLv2 or later
@@ -596,7 +596,7 @@ class Total_Slider {
 						date("Ymd", @filemtime(plugin_dir_path( __FILE__ ) .
 														 '/templates/total-slider-template.js')) , 			/* ver */
 						'all'
-					);
+					); wp_enqueue_script('total-slider-frontend'); // fixes #6
 				}
 			}
 

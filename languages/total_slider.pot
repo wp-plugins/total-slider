@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Total Slider package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Total Slider 1.0\n"
+"Project-Id-Version: Total Slider 1.0.1\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/total-slider\n"
 "POT-Creation-Date: 2012-05-11 07:03:47+00:00\n"
 "MIME-Version: 1.0\n"
