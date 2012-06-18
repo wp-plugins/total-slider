@@ -4,7 +4,7 @@ Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
 Tested up to: 3.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
@@ -45,6 +45,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 1.0.2 =
+* Fix a few minor interface issues for WordPress 3.4 that did not show up in the release candidate testing.
+
 = 1.0.1 =
 * Fix bug where Total Slider would fail to enqueue the slider JavaScript if you used a custom PHP template or custom CSS, but not your own custom JavaScript.
 
@@ -52,6 +55,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+Fixes a few minor interface issues for WordPress 3.4 that did not show up in the release candidate testing.
 
 = 1.0.1 =
 
