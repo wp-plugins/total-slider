@@ -4,7 +4,7 @@ Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
 Tested up to: 3.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
@@ -19,6 +19,8 @@ Total Slider allows you to create a number of ‘slide groups’. Each slide in 
 Once this plugin is installed and activated, use the Slider tab in your WordPress dashboard to assemble a group of slides with text, backgrounds and so on. You can then have the slides show up on any page of your site using the Total Slider widget.
 
 Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widget to the correct area. Then, simply select the slide group to show in this area of your site.
+
+**Available in**: English, Français
 
 = Key links =
 
@@ -45,6 +47,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 1.0.3 =
+* Add developer-focused shortcode support, French translation (thanks Frédéric Serva) and fixed a few i18n omissions
+
 = 1.0.2 =
 * Fix a few minor interface issues for WordPress 3.4 that did not show up in the release candidate testing.
 
@@ -55,6 +60,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Adds developer-focused shortcode support, French translation (thanks Frédéric Serva) and fixed a few i18n omissions.
 
 = 1.0.2 =
 Fixes a few minor interface issues for WordPress 3.4 that did not show up in the release candidate testing.
