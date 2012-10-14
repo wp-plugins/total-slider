@@ -74,6 +74,7 @@ ul#slidesort li.slidesort-selected {
 	color: #FFF;
 	text-shadow: 0 1px 1px #000;
 	background: url(../img/slider-desc-bg.png);
+	background: rgba(0, 0, 0, 0.65);
 }
 
 .slidesort-icon {
@@ -107,26 +108,20 @@ ul#slidesort li:hover .slidesort-icon {
 }
 
 
-/* New slide button */
+/* Yay for vendor prefices */
 
-ul#new-slide-button {
-	text-align:right;
-	margin:20px;
-	padding:5px;
+input#edit-slide-link:-webkit-input-placeholder {
+    color:rgba(178,178,178,0.82);
+}
+input#edit-slide-link:-moz-placeholder {
+    color:rgba(178,178,178,0.82);
+}
+input#edit-slide-link:-ms-input-placeholder {
+    color:rgba(178,178,178,0.82);
 }
 
-ul#new-slide-button li {
-	text-align:right;
-	border-width: 3px;
-	border-color: #566b4d;
-	border-style: solid;
-	background-color: #a8d097;
-	display:inline;
-	margin: 10px 10px 10px 10px;
-	padding: 10px 16px 10px 16px;
-	cursor:pointer;
-	font-weight:bold;
-	font-size:120%;
+select#template-slug {
+	min-width:170px;	
 }
 
 
@@ -137,13 +132,26 @@ ul#new-slide-button li {
 	background: url(../img/slider-workspace-bg.png);
 	padding: 30px;
 	border: 1px solid #BBB;
+	min-height:250px;
 }
 
-#slide-preview {
-	cursor: move;
+.total-slider-template-draggable {
+	cursor: move !important;
 }
 
+.preview-var-placeholder {
+	display: none;	
+}
 
+.template-render-error {
+	text-align:center;
+	font-size:14pt;
+	background-color:#fffcd3;
+	border:1px solid #d4d400;
+	padding:20px;
+	height:auto;
+	width:auto;
+}
 /* Edit area */
 
 #edit-controls {
@@ -206,10 +214,19 @@ ul#new-slide-button li {
 	top: 1px;
 }
 
+#template-switch-controls {
+	margin-bottom: 0;
+	padding:0;
+	margin-left:auto;
+	margin-right:auto;
+	text-align: center;
+	max-width:360px;
+}
+
 
 /* HINT TEXT */
 
-#edit-controls-choose-hint, .slidesort-add-hint, .no-items td {
+#edit-controls-choose-hint p, .slidesort-add-hint, .no-items td {
 	font-size: 150% !important;
 	color: #888 !important;
 	text-align: center !important;
@@ -257,6 +274,10 @@ ul#new-slide-button li {
 .column-slides_count {
 	width: 100px !important;
 	max-width: 100px !important;
+}
+
+.column-template {
+	width:90px;	
 }
 
 .column-actions {

@@ -1,10 +1,13 @@
 <?php
-/********************************************************************************
+/*
+Total Slider Ajax Interface
+	
+This file is invoked by Total Slider when the user is manipulating
+slides in the edit interface. It is responsible for receiving commands
+from the edit interface, executing them (invoking the Total_Slide_Group class)
+and returning JSON to the interface on success, or failure.
 
-	AJAX interface for the VPM Slider edit interface
-
-
-*********************************************************************************/
+/* ----------------------------------------------*/
 
 /*  Copyright (C) 2011-2012 Peter Upfold.
 
@@ -42,7 +45,40 @@ if (!function_exists('__'))
 	die('<h1>Forbidden</h1>');
 }
 
-require_once(dirname(__FILE__).'/slides_backend.php');
+require_once(dirname(__FILE__).'/slide_group.php');
+
+// get list of slide groups if asked
+if (!array_key_exists('group', $_GET) && $_GET['action'] == 'getSlideGroups')
+{
+
+	if (!current_user_can(TOTAL_SLIDER_REQUIRED_CAPABILITY))
+	{
+		header('HTTP/1.0 403 Forbidden');
+		header('Content-Type: application/json');
+		echo json_encode(array('error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider')));
+		die();
+	}
+	
+	$groups = get_option('total_slider_slide_groups');
+	
+	$results = array();
+	$i = 0;
+	
+	if (is_array($groups) && count($groups) > 0)
+	{
+		foreach($groups as $group)
+		{
+			$results[$i]['slug'] = $group->slug;
+			$results[$i]['name'] = $group->name;
+			$i++;
+		}		
+	}
+	
+	header('Content-Type: application/json');
+	echo json_encode($results);
+	die();
+
+}
 
 // get the group that we are supposed to be acting on
 if (array_key_exists('group', $_GET)) {
@@ -61,7 +97,13 @@ if (empty($slug))
 }
 
 try {
-	$be = new Total_Slider_Backend($slug);
+	$g = new Total_Slide_Group($slug);
+	if (!$g->load()) {
+		header('HTTP/1.0 400 Bad Request');
+		header('Content-Type: application/json');
+		echo json_encode(array('error' => __('Could not load the selected Slide Group. Does it exist?', 'total_slider')));
+		die();
+	}
 }
 catch (Exception $e)
 {
@@ -129,12 +171,25 @@ switch ($_GET['action'])
 			die();			
 		}
 		
-		if (!empty($_POST['background']) && !$be->validateURL($_POST['background']))
+		if (!empty($_POST['background']))
 		{
-			header('HTTP/1.0 400 Bad Request');
-			header('Content-Type: application/json');
-			echo json_encode(array('error' => __('Invalid URL format for the specified background URL.', 'total_slider')));
-			die();			
+			if (is_numeric($_POST['background']))
+			{
+				if ((int)$_POST['background'] != $_POST['background'])
+				{
+					header('HTTP/1.0 400 Bad Request');
+					header('Content-Type: application/json');
+					echo json_encode(array('error' => __('Invalid attachment ID for the specified background.', 'total_slider')));
+					die();	
+				}
+			}
+			else if (!$g->validateURL($_POST['background']))
+			{
+				header('HTTP/1.0 400 Bad Request');
+				header('Content-Type: application/json');
+				echo json_encode(array('error' => __('Invalid URL format for the specified background URL.', 'total_slider')));
+				die();			
+			}	
 		}
 		
 		if (!empty($_POST['link']))
@@ -152,7 +207,7 @@ switch ($_GET['action'])
 				}
 			}
 			else {
-				if (!$be->validateURL($_POST['link']))
+				if (!$g->validateURL($_POST['link']))
 				{
 					header('HTTP/1.0 400 Bad Request');
 					header('Content-Type: application/json');
@@ -166,12 +221,10 @@ switch ($_GET['action'])
 		$_POST['description'] = stripslashes($_POST['description']);
 		
 		// do the work
-		$result = $be->createNewSlide($_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y']);
+		$result = $g->newSlide($_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y']);
 		
 		if ($result) {
 			header('Content-Type: application/json');
-			$result['title'] = stripslashes($result['title']);
-			$result['description'] = stripslashes($result['description']);
 			echo json_encode(array('new_id' => $result));
 			die();
 		}
@@ -214,7 +267,7 @@ switch ($_GET['action'])
 			die();				
 		}
 		
-		$result = $be->getSlideDataWithID($_POST['id']);
+		$result = $g->getSlide($_POST['id']);
 		
 		if (is_array($result) && count($result) > 0) {
 		
@@ -300,12 +353,25 @@ switch ($_GET['action'])
 			die();			
 		}
 		
-		if (!empty($_POST['background']) && !$be->validateURL($_POST['background']))
+		if (!empty($_POST['background']))
 		{
-			header('HTTP/1.0 400 Bad Request');
-			header('Content-Type: application/json');
-			echo json_encode(array('error' => __('Invalid URL format for the specified background URL.', 'total_slider')));
-			die();			
+			if (is_numeric($_POST['background']))
+			{
+				if ((int)$_POST['background'] != $_POST['background'])
+				{
+					header('HTTP/1.0 400 Bad Request');
+					header('Content-Type: application/json');
+					echo json_encode(array('error' => __('Invalid attachment ID for the specified background.', 'total_slider')));
+					die();	
+				}
+			}
+			else if (!$g->validateURL($_POST['background']))
+			{
+				header('HTTP/1.0 400 Bad Request');
+				header('Content-Type: application/json');
+				echo json_encode(array('error' => __('Invalid URL format for the specified background URL.', 'total_slider')));
+				die();			
+			}	
 		}
 		
 		if (!empty($_POST['link']))
@@ -323,7 +389,7 @@ switch ($_GET['action'])
 				}
 			}
 			else {
-				if (!$be->validateURL($_POST['link']))
+				if (!$g->validateURL($_POST['link']))
 				{
 					header('HTTP/1.0 400 Bad Request');
 					header('Content-Type: application/json');
@@ -336,7 +402,7 @@ switch ($_GET['action'])
 		$_POST['title'] = stripslashes($_POST['title']);
 		$_POST['description'] = stripslashes($_POST['description']);
 
-		$result = $be->updateSlideWithIDAndData($_POST['id'], $_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y']);
+		$result = $g->updateSlide($_POST['id'], $_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y']);
 		
 		if ($result)
 		{
@@ -385,7 +451,7 @@ switch ($_GET['action'])
 			$_POST['slidesort'][$key] = preg_replace('[^0-9a-zA-Z_]', '', $item);
 		}
 		
-		$result = $be->reshuffleSlides($_POST['slidesort']);
+		$result = $g->reshuffle($_POST['slidesort']);
 		
 		if ($result === 'disparity')
 		{
@@ -439,7 +505,7 @@ switch ($_GET['action'])
 			die();				
 		}
 		
-		$result = $be->deleteSlideWithID($_POST['id']);
+		$result = $g->deleteSlide($_POST['id']);
 		
 		if ($result)
 		{

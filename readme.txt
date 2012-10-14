@@ -3,8 +3,8 @@ Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
-Tested up to: 3.4.1
-Stable tag: 1.0.4
+Tested up to: 3.4.2
+Stable tag: 1.1
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
@@ -18,7 +18,7 @@ Total Slider allows you to create a number of ‘slide groups’. Each slide in 
 
 Once this plugin is installed and activated, use the Slider tab in your WordPress dashboard to assemble a group of slides with text, backgrounds and so on. You can then have the slides show up on any page of your site using the Total Slider widget.
 
-Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widget to the correct area. Then, simply select the slide group to show in this area of your site.
+Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widget to the correct area. Then, simply select the slide group to show in this area of your site. You can also use the Total Slider shortcode to add a slider into a post or page by clicking the new button in the editor toolbar.
 
 **Available in**: English, Français
 
@@ -38,7 +38,7 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 == Screenshots ==
 
 1. The slide groups screen.
-2. Creating a new slide group is easy: just give it a name.
+2. Creating a new slide group is easy: just give it a name and choose a template.
 3. Getting started on a new slide group.
 4. Make changes to the slide, and see the preview update in real time.
 5. Use the standard WordPress uploader to set your background image.
@@ -46,6 +46,13 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 7. Link the slide to a page or post on your site easily.
 
 == Changelog ==
+
+= 1.1 =
+* Introducing multiple slide templates — use Total Slider on different parts of your site, with a unique look for each of your slide groups.
+* Includes two beautiful new built-in templates, Twenty Twelve and Twenty Twelve (Alternate), which perfectly complement [WordPress’ new theme](http://wordpress.org/extend/themes/twentytwelve) for this year.
+* Easily add a slider to any post or page with the shortcode. Look for the Total Slider button in the editor toolbar.
+* New, more flexible support for (multiple) custom templates. Your templates can now have any type of DOM structure and this will be reflected automatically in the editor, for a fully WYSIWYG experience.
+* Many minor improvements, including `E_STRICT` and `E_NOTICE` compliance, a fix for a bug where the first slide would always be blank and adoption of the `.min.js` naming standard for minified JavaScript files, ready for WordPress 3.5.
 
 = 1.0.4 =
 * Fix some potential issues with JavaScript enqueueing, minify and combine JavaScript
@@ -64,8 +71,20 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Upgrade Notice ==
 
+= 1.1 =
+
+This release is a significant new feature release.
+
+**Please note:** users of custom templates should read [about the changes to custom templates](https://github.com/vanpattenmedia/total-slider/wiki/Upgrading-v1.0.x-Templates-to-v1.1) and back up their WordPress database before running the upgrade.
+
+* Introducing multiple slide templates — use Total Slider on different parts of your site, with a unique look for each of your slide groups.
+* Includes two beautiful new built-in templates, Twenty Twelve and Twenty Twelve (Alternate), which perfectly complement [WordPress’ new theme](http://wordpress.org/extend/themes/twentytwelve) for this year.
+* Easily add a slider to any post or page with the shortcode. Look for the Total Slider button in the editor toolbar.
+* New, more flexible support for (multiple) custom templates. Your templates can now have any type of DOM structure and this will be reflected automatically in the editor, for a fully WYSIWYG experience.
+* Many minor improvements, including `E_STRICT` and `E_NOTICE` compliance, a fix for a bug where the first slide would always be blank and adoption of the `.min.js` naming standard for minified JavaScript files, ready for WordPress 3.5.
+
 = 1.0.4 =
-Fixes some potential issues with JavaScript enqueueing, and adds minifies and combined JavaScript for improved site performance.
+Fixes some potential issues with JavaScript enqueueing, and adds minified and combined JavaScript for improved site performance.
 
 = 1.0.3 =
 Adds developer-focused shortcode support, French translation (thanks Frédéric Serva) and fixed a few i18n omissions.
