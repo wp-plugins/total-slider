@@ -4,7 +4,7 @@ Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
 Tested up to: 3.4.2
-Stable tag: 1.1
+Stable tag: 1.0.4
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
