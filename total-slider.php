@@ -3,7 +3,7 @@
 Plugin Name: Total Slider
 Plugin URI: http://www.totalslider.com/
 Description: The best experience for building sliders, with true WYSIWYG, drag & drop and more!
-Version: 1.1
+Version: 1.1.1
 Author: Peter Upfold
 Author URI: http://www.vanpattenmedia.com/
 License: GPLv2 or later
@@ -95,6 +95,8 @@ class Total_Slider {
 		Admin page, and configure some default general options.
 	*/
 	
+		global $current_user;
+	
 		$noSlideGroups = false;
 
 		if (!get_option('total_slider_slide_groups')) {
@@ -105,7 +107,14 @@ class Total_Slider {
 
 		// set the capability for administrator so they can visit the options page
 		$admin = get_role('administrator');
-		$admin->add_cap(TOTAL_SLIDER_REQUIRED_CAPABILITY);
+		$admin->add_cap( TOTAL_SLIDER_REQUIRED_CAPABILITY );
+		
+		get_currentuserinfo();
+		
+		// ensure that the current user can manage the plugin once installed (references #49)
+		if ( current_user_can('install_plugins') ) {
+			$current_user->add_cap( TOTAL_SLIDER_REQUIRED_CAPABILITY );
+		}
 
 		// set up default general options
 
@@ -1402,7 +1411,7 @@ class Total_Slider {
 						<th scope="row">
 							<label for="required_capabilities"><?php _e('Required role level', 'total_slider');?></label>
 						</th>
-						<td>
+						<td><fieldset>
 							<?php
 							$allRoles = get_editable_roles();
 							?>
@@ -1426,24 +1435,24 @@ class Total_Slider {
 											disabled="disabled"
 											 <?php endif; ?>
 
-										 /><?php echo esc_html($r['name']);?>
+										 /> <?php echo esc_html($r['name']);?>
 									</label><br/>
 							<?php endforeach; endif; ?>
 							<span class="description"><?php _e('Users belonging to checked roles will be able to create, edit and delete slides. Only users that can manage widgets are able to activate, deactivate or move the Total Slider widget, which makes the slides show up on your site.', 'total_slider');?></span>
-						</td>
+						</fieldset></td>
 					</tr>
 					
 					<tr class="form-field">
 						<th scope="row">
 							<label for="should_show_tinymce_button"><?php _e('Editor', 'total_slider');?></label>			
 						</th>
-						<td>
+						<td><fieldset>
 							<label for="should_show_tinymce_button">
 								<input type="checkbox" name="should_show_tinymce_button" id="should_show_tinymce_button" value="1" style="width:20px;"
 								<?php echo ( array_key_exists('should_show_tinymce_button', $otherOptions) && intval($otherOptions['should_show_tinymce_button']) ) ? ' checked="checked"' : ''; ?>
-								/><?php _e('Show the Total Slider button in the editor toolbar', 'total_slider');?>
+								/> <?php _e('Show the Total Slider button in the editor toolbar', 'total_slider');?>
 							</label>
-						</td>
+						</fieldset></td>
 					</tr>
 
 				</tbody>
@@ -1457,14 +1466,14 @@ class Total_Slider {
 						<th scope="row">
 							<label for="should_enqueue_template"><?php _e('Load JS & CSS', 'total_slider');?></label>
 						</th>
-						<td>
+						<td><fieldset>
 							<label for="should_enqueue_template">
 								<input type="checkbox" name="should_enqueue_template" id="should_enqueue_template" value="1" style="width:20px;"
 								<?php echo ( intval($otherOptions['should_enqueue_template']) ) ? ' checked="checked"' : ''; ?>
-								/><?php _e('Automatically load slide template CSS and JavaScript into my theme', 'total_slider');?>
+								/> <?php _e('Automatically load slide template CSS and JavaScript into my theme', 'total_slider');?>
 							</label><br/>
 							<span class="description"><?php _e('Uncheck for manual control over how slide template CSS and JavaScript are included in your theme.', 'total_slider');?></span>
-						</td>
+						</fieldset></td>
 					</tr>
 				</tbody>
 			</table>
@@ -1737,7 +1746,7 @@ class Total_Slider {
 					<?php endif; ?>
 													
 				</select>
-			<input id="template-switch-button" type="submit" class="button-secondary action" style="margin-top:8px; max-width:100px;" value="<?php _e('Change Template', 'total_slider');?>" />
+			<input id="template-switch-button" type="submit" class="button-secondary action" style="margin-top:8px; max-width:180px;" value="<?php _e('Change Template', 'total_slider');?>" />
 			</p>
 		</div><?php	
 		
@@ -1875,7 +1884,7 @@ class Total_Slider {
 								<td>
 									<span id="slide-link-internal-display"><?php _e('No post selected', 'total_slider');?></span>
 									<input id="slide-link-internal-id" name="slide-link-internal" value="" type="hidden" />
-									<input id="slide-link-finder" type="button" class="button" value="<?php _e('Find post', 'total_slider');?>" style="width:50px;" />
+									<input id="slide-link-finder" type="button" class="button" value="<?php _e('Find post', 'total_slider');?>" style="width:70px;" />
 								</td>
 							</tr>
 

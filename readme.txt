@@ -3,8 +3,9 @@ Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
-Tested up to: 3.4.2
-Stable tag: 1.1
+Tested up to: 3.5
+Stable tag: 1.1.1
+License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
@@ -47,6 +48,11 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 1.1.1 =
+* Some minor user interface tweaks in readiness for WordPress 3.5.
+* Fixes an issue where the user who installed Total Slider may not see it in the WordPress admin sidebar.
+* A moderate impact security update — prevents malicious slide group names from interacting with the Insert Slider popup window in the Editor.
+
 = 1.1 =
 * Introducing multiple slide templates — use Total Slider on different parts of your site, with a unique look for each of your slide groups.
 * Includes two beautiful new built-in templates, Twenty Twelve and Twenty Twelve (Alternate), which perfectly complement [WordPress’ new theme](http://wordpress.org/extend/themes/twentytwelve) for this year.
@@ -70,6 +76,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+
+This release is a bugfix release, with some WordPress 3.5 fixes, as well as a moderate impact security update.
 
 = 1.1 =
 
