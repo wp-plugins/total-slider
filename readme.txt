@@ -3,8 +3,8 @@ Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
-Tested up to: 3.5
-Stable tag: 1.1.1
+Tested up to: 3.5.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
@@ -48,6 +48,11 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 1.1.2 =
+
+* Support for the WordPress 3.5 uploader.
+* Code cleanup, now complies with WordPress Coding Standards.
+
 = 1.1.1 =
 * Some minor user interface tweaks in readiness for WordPress 3.5.
 * Fixes an issue where the user who installed Total Slider may not see it in the WordPress admin sidebar.
@@ -76,6 +81,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+
+Adds support for the WordPress 3.5 media uploader.
 
 = 1.1.1 =
 
