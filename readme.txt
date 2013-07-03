@@ -3,8 +3,8 @@ Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
-Tested up to: 3.5.1
-Stable tag: 1.1.2
+Tested up to: 3.5.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
@@ -48,6 +48,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 1.1.3 =
+* Fix a bug where Total Slider’s interface would not be functional if the user preferred to not use WordPress’ rich text editor.
+
 = 1.1.2 =
 
 * Support for the WordPress 3.5 uploader.
@@ -81,6 +84,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.3 =
+
+Fixes a bug that would cause Total Slider to not be functional with rich text editing turned off.
 
 = 1.1.2 =
 
