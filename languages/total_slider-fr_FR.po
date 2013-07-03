@@ -1,4 +1,4 @@
-# Copyright (C) 2012 Total Slider
+# Copyright (C) 2012-2013 Total Slider
 # This file is distributed under the same license as the Total Slider package.
 msgid ""
 msgstr ""
@@ -97,48 +97,48 @@ msgstr "Vous n'avez pas indiqué quelle ID doit être supprimée."
 msgid "The delete slide operation failed at the server. Perhaps it has already been deleted by someone else."
 msgstr "L'opération de suppression de la diapositive n'a pas abouti sur ce serveur. Peut-être a-t-elle déjà été supprimée par quelqu'un d'autre."
 
-#: includes/slide_group.php:659
+#: includes/class.total-slide-group.php:659
 msgid "Unable to render the slide mini-preview: %s (error code %d)"
 msgstr "Impossible d'afficher le mini-aperçu de la diapositive : %s (code erreur %d)"
 
-#: includes/slide_group.php:666
+#: includes/class.total-slide-group.php:666
 msgid "Template:"
 msgstr "Template :"
 
-#: includes/slide_group.php:673
+#: includes/class.total-slide-group.php:673
 msgid "There are no slides to show."
 msgstr "Aucune diapositive à afficher."
 
-#: includes/slide_groups_table.php:39
+#: includes/class.slide-groups-table.php:39
 msgid "slide group"
 msgstr "Groupe"
 
-#: includes/slide_groups_table.php:40
+#: includes/class.slide-groups-table.php:40
 msgid "slide groups"
 msgstr "Groupes"
 
-#: includes/slide_groups_table.php:54
+#: includes/class.slide-groups-table.php:54
 #: total-slider.php:993
 msgid "Group Name"
 msgstr "Nom du groupe"
 
-#: includes/slide_groups_table.php:55
+#: includes/class.slide-groups-table.php:55
 #: total-slider.php:997
 #: total-slider.php:1185
 msgid "Template"
 msgstr "Template"
 
-#: includes/slide_groups_table.php:56
+#: includes/class.slide-groups-table.php:56
 #: total-slider.php:1181
 msgid "Slides"
 msgstr "Diapositives"
 
-#: includes/slide_groups_table.php:83
+#: includes/class.slide-groups-table.php:83
 #: total-slider.php:1184
 msgid "Edit"
 msgstr "Editer"
 
-#: includes/slide_groups_table.php:85
+#: includes/class.slide-groups-table.php:85
 msgid ""
 "Are you sure you want to delete this slide group?\\n"
 "\\n"
@@ -148,44 +148,44 @@ msgstr ""
 "\\n"
 "Cette action ne peut être annulée."
 
-#: includes/slide_groups_table.php:86
-#: includes/slide_groups_table.php:162
+#: includes/class.slide-groups-table.php:86
+#: includes/class.slide-groups-table.php:162
 msgid "Remove"
 msgstr "Supprimer"
 
-#: includes/slide_groups_table.php:234
+#: includes/class.slide-groups-table.php:234
 msgid "Click &lsquo;Add New&rsquo; to create a new group of slides."
 msgstr "Cliquez sur &lsquo;Ajouter&rsquo; pour créer un nouveau groupe de diapositives."
 
-#: includes/template_manager.php:103
-#: includes/template_manager.php:1357
-msgid "The allowed template locations are not available. This file must not be loaded without slide_group.php"
-msgstr "Les emplacements des templates autorisés ne sont pas disponibles. Ce fichier ne doit pas être chargé sans slide_group.php"
+#: includes/class.total-slider-template.php:103
+#: includes/class.total-slider-template.php:1357
+msgid "The allowed template locations are not available. This file must not be loaded without class.total-slide-group.php"
+msgstr "Les emplacements des templates autorisés ne sont pas disponibles. Ce fichier ne doit pas être chargé sans class.total-slide-group.php"
 
-#: includes/template_manager.php:116
-#: includes/template_manager.php:476
-#: includes/template_manager.php:1364
+#: includes/class.total-slider-template.php:116
+#: includes/class.total-slider-template.php:476
+#: includes/class.total-slider-template.php:1364
 msgid "The supplied template location is not one of the allowed template locations"
 msgstr "L'emplacement indiqué pour les templates n'appartient pas aux emplacements autorisés"
 
-#: includes/template_manager.php:213
-#: includes/template_manager.php:331
-#: includes/template_manager.php:404
-#: includes/template_manager.php:468
-#: includes/template_manager.php:507
+#: includes/class.total-slider-template.php:213
+#: includes/class.total-slider-template.php:331
+#: includes/class.total-slider-template.php:404
+#: includes/class.total-slider-template.php:468
+#: includes/class.total-slider-template.php:507
 msgid "The template's %s file was not found, but we expected to find it at '%s'."
 msgstr "Le fichier de template %s n'a pu être trouvé, mais nous pensons pouvoir le trouver à '%s'."
 
-#: includes/template_manager.php:346
+#: includes/class.total-slider-template.php:346
 msgid "Unable to determine the WP_CONTENT_DIR, so cannot load this template."
 msgstr "WP_CONTENT_DIR impossible à déterminer. Ce template ne peut donc pas être chargé."
 
-#: includes/template_manager.php:703
-#: includes/template_manager.php:1420
+#: includes/class.total-slider-template.php:703
+#: includes/class.total-slider-template.php:1420
 msgid "v1.0 Custom Template"
 msgstr "Template personnalisé v1.0"
 
-#: includes/template_manager.php:1389
+#: includes/class.total-slider-template.php:1389
 msgid "Unable to determine the WP_CONTENT_DIR, so cannot find relevant templates."
 msgstr "WP_CONTENT_DIR impossible à déterminer. Aucun template pertinent ne peut donc pas être trouvé."
 
@@ -620,8 +620,8 @@ msgid "Thanks!"
 msgstr "Merci !"
 
 #: total-slider.php:1569
-msgid "© 2011-2012 Peter Upfold. Proud to be <a href=\"https://www.gnu.org/licenses/gpl-2.0.html\">GPLv2 (or later) licensed</a>."
-msgstr "© 2011-2012 Peter Upfold. Fier de la distribution sous license <a href=\"https://www.gnu.org/licenses/gpl-2.0.html\">GPLv2 (ou suivante)</a>."
+msgid "© 2011-2013 Peter Upfold. Proud to be <a href=\"https://www.gnu.org/licenses/gpl-2.0.html\">GPLv2 (or later) licensed</a>."
+msgstr "© 2011-2013 Peter Upfold. Fier de la distribution sous license <a href=\"https://www.gnu.org/licenses/gpl-2.0.html\">GPLv2 (ou suivante)</a>."
 
 #: total-slider.php:1570
 msgid "Built by <a href=\"http://www.vanpattenmedia.com/\">Van Patten Media</a>"
