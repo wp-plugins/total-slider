@@ -1,10 +1,11 @@
 === Total Slider ===
 Contributors: PeterUpfold, VanPattenMedia
-Donate link: http://www.vanpattenmedia.com/project/total-slider/#contribute
+Donate link: http://www.totalslider.com/donate/
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
-Tested up to: 3.4.2
-Stable tag: 1.0.4
+Tested up to: 3.7
+Stable tag: 1.1.4
+License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
@@ -25,9 +26,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 = Key links =
 
 * [TotalSlider.com](http://www.totalslider.com)
-* [User Docs](http://www.vanpattenmedia.com/project/total-slider/docs)
+* [User Docs](http://www.totalslider.com/docs/)
 * [Developer Docs](https://github.com/vanpattenmedia/total-slider/wiki)
-* [License](http://www.vanpattenmedia.com/project/total-slider/license/)
+* [License](https://raw.github.com/vanpattenmedia/total-slider/master/license.txt)
 	
 == Installation ==
 
@@ -46,6 +47,22 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 7. Link the slide to a page or post on your site easily.
 
 == Changelog ==
+
+= 1.1.4 =
+* Important fix for WordPress 3.7 — prevents new slides from replacing old ones when you add a new slide.
+
+= 1.1.3 =
+* Fix a bug where Total Slider’s interface would not be functional if the user preferred to not use WordPress’ rich text editor.
+
+= 1.1.2 =
+
+* Support for the WordPress 3.5 uploader.
+* Code cleanup, now complies with WordPress Coding Standards.
+
+= 1.1.1 =
+* Some minor user interface tweaks in readiness for WordPress 3.5.
+* Fixes an issue where the user who installed Total Slider may not see it in the WordPress admin sidebar.
+* A moderate impact security update — prevents malicious slide group names from interacting with the Insert Slider popup window in the Editor.
 
 = 1.1 =
 * Introducing multiple slide templates — use Total Slider on different parts of your site, with a unique look for each of your slide groups.
@@ -70,6 +87,22 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.4 =
+
+Important fix for WordPress 3.7 — prevents new slides from replacing old ones when you add a new slide.
+
+= 1.1.3 =
+
+Fixes a bug that would cause Total Slider to not be functional with rich text editing turned off.
+
+= 1.1.2 =
+
+Adds support for the WordPress 3.5 media uploader.
+
+= 1.1.1 =
+
+This release is a bugfix release, with some WordPress 3.5 fixes, as well as a moderate impact security update.
 
 = 1.1 =
 

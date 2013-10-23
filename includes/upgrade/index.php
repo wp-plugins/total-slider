@@ -1,3 +1,6 @@
 <?php
-// Customised silence is even more golden.
-?>
+/*
+I dreamed of a haiku
+To silence the upgrades
+Nobody comes here
+*/
