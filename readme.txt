@@ -3,15 +3,25 @@ Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.totalslider.com/donate/
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 3.3.1
-Tested up to: 3.7
-Stable tag: 1.1.4
+Tested up to: 4.0
+Stable tag: 1.1.5
 License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
 
 == Description ==
 
-**[Total Slider](http://www.totalslider.com/)** is a plugin for WordPress from Van Patten Media that will transform your experience with sliders forever. Build your own templates in PHP and CSS, then preview the output in a beautiful WYSIWYG interface designed to blend seamlessly with the WordPress core.
+**[Total Slider](http://www.totalslider.com/)** is a plugin for WordPress from Van Patten Media that helps web developers build sliders that can be easily managed by non-technical users.
+
+Build your own templates in HTML/PHP, CSS, and JavaScript, and Total Slider will supply a WYSIWYG interface designed to blend seamlessly wit the WordPress core.
+
+= Note to non-technical users =
+
+Total Slider makes editing sliders easy, but it typically needs to be installed and configured by an experienced developer first. Out of the box, Total Slider does _not_ provide a way to edit your theme, add previous/next buttons, and otherwise customise the look of the slider without diving into code.
+
+It does, however, ship with three built-in templates and is very easy to use if you are happy using those.
+
+If you're looking for a slider solution that won't involve editing code to set it up, Total Slider probably is not for you.
 
 = How it works =
 
@@ -47,6 +57,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 7. Link the slide to a page or post on your site easily.
 
 == Changelog ==
+
+= 1.1.5 =
+* Fixes compatibility with WordPress 4.0. No longer requires you to enter a slide description if you do not want one.
 
 = 1.1.4 =
 * Important fix for WordPress 3.7 — prevents new slides from replacing old ones when you add a new slide.
@@ -87,6 +100,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.5 =
+
+Fixes compatibility with WordPress 4.0. No longer requires you to enter a slide description if you do not want one.
 
 = 1.1.4 =
 
