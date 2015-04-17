@@ -1,4 +1,4 @@
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -24,6 +24,11 @@ var originalBackgroundID = false;
 var dontStartEdit = false;
 var newShouldShuffle = false;
 var deleteCaller = false;
+var autoSaveExistingStatus = false;
+var isCurrentlySaving = false;
+var lastSaveState = '';
+var lastChange = 0;
+var lastAutoSave = 0;
 var linkToSave = '';
 var tplEJS = false;
 
@@ -174,7 +179,7 @@ jQuery(document).ready(function($) {
 			var newIdNo = $('#slidesort').children().length+1;
 			
 			// create a new button
-			$('#slidesort').append('<li id="slidesort_untitled'  + newIdNo + '" style="background: url();" class="slidesort-selected"><div class="slidesort_slidebox" style="background:url();"><div id="slidesort_untitled'  + newIdNo + '_text" class="slidesort_text">' + _total_slider_L10n.newSlideTemplateUntitled + '</div><a id="slidesort_'  + newIdNo + '_move_button" class="slidesort-icon slide-move-button" href="#">' + _total_slider_L10n.newSlideTemplateMove + '</a><span id="slidesort_'  + newIdNo + '_delete" class="slide-delete"><a id="slidesort_untitled'  + newIdNo + '_delete_button" class="slidesort-icon slide-delete-button" href="#">' + _total_slider_L10n.newSlideTemplateDelete + '</a></span></div></li>');			
+			$('#slidesort').append('<li id="slidesort_untitled'  + newIdNo + '" style="background: url();" class="slidesort-draft slidesort-selected"><div class="slidesort_slidebox" style="background:url();"><div id="slidesort_untitled'  + newIdNo + '_text" class="slidesort_text total-slider_' + _total_slider_locale + '">' + _total_slider_L10n.newSlideTemplateUntitled + '</div><a id="slidesort_'  + newIdNo + '_move_button" class="slidesort-icon slide-move-button" href="#">' + _total_slider_L10n.newSlideTemplateMove + '</a><span id="slidesort_'  + newIdNo + '_delete" class="slide-delete"><a id="slidesort_untitled'  + newIdNo + '_delete_button" class="slidesort-icon slide-delete-button" href="#">' + _total_slider_L10n.newSlideTemplateDelete + '</a></span></div></li>');			
 			
 			// hook up new pseudo-delete button
 			$('#slidesort_untitled' + newIdNo + '_delete_button').click(function (event) {
@@ -216,6 +221,8 @@ jQuery(document).ready(function($) {
 		$('#slide-link-is-external').prop('checked', false);
 		$('#slide-link-internal-settings').hide();
 		$('#slide-link-external-settings').hide();	
+		$('#edit-slide-publish-status').val('draft');
+		$('#edit-controls-save-draft').removeProp( 'disabled' );
 		
 		// reset preview area
 		slidePreviewData = $.extend(true, {}, slidePreviewUntitledData);
@@ -223,8 +230,8 @@ jQuery(document).ready(function($) {
 		
 		$('#edit-controls-saving').fadeTo(0,0).hide();
 		
-		$('#edit-controls-save,#edit-controls-cancel').removeAttr('disabled');
-		$('#edit-controls-save').val(_total_slider_L10n.saveButtonValue);
+		$('#edit-controls-publish,#edit-controls-cancel').removeAttr('disabled');
+		$('#edit-controls-publish').val(_total_slider_L10n.publishButtonValue);
 		
 		linkToSave = '';
 	
@@ -233,6 +240,8 @@ jQuery(document).ready(function($) {
 	/* any form editing performed, set inEditing to true */
 	$('.edit-controls-inputs').keyup(function(e) {
 		isEditing = true;
+		$('#' + editingSlideSortButton).addClass('slidesort-unsaved');
+		lastChange = Date.now();
 	});
 	
 	/* click on a slide in the resortable list to select it for editing */
@@ -252,6 +261,7 @@ jQuery(document).ready(function($) {
 			if (confirm(_total_slider_L10n.switchEditWouldLoseChanges))
 			{
 				isEditing = false;
+				$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
 				
 				if (isEditingUntitledSlide) {
 					$('#' + isEditingUntitledSlide).remove();				
@@ -327,6 +337,8 @@ jQuery(document).ready(function($) {
 							$('#slide-link-internal-settings').hide();
 							$('#slide-link-external-settings').hide();
 						}
+
+						$('#edit-slide-publish-status').val( result.post_status );
 						
 						slidePreviewData.title = result.title;
 						slidePreviewData.description = result.description;
@@ -358,6 +370,11 @@ jQuery(document).ready(function($) {
 						else {
 							slidePreviewData.x = slidePreviewUntitledData.x;
 							slidePreviewData.y = slidePreviewUntitledData.y;
+						}
+
+						// determine if published and enable only appropriate controls
+						if ( result.post_status == 'publish' ) {
+							$( '#edit-controls-save-draft' ).prop('disabled', 'disabled' );
 						}
 						
 						// ok, do the grand unveiling
@@ -396,7 +413,12 @@ jQuery(document).ready(function($) {
 	/* show saved message */
 	$.fn.showSavedMessage = function() {
 	
-		$('#message-area').html('<p>' + _total_slider_L10n.slideSaved + '</p>');
+		if ( 'publish' == $('#edit-slide-publish-status').val() ) {
+			$('#message-area').html('<p>' + _total_slider_L10n.slidePublished + '</p>');
+		}
+		else {
+			$('#message-area').html('<p>' + _total_slider_L10n.slideDraftSaved + '</p>');
+		}
 		$('#message-area').fadeIn('slow');
 		window.setTimeout(function() {
 			$('#message-area').fadeOut('slow');
@@ -523,6 +545,7 @@ jQuery(document).ready(function($) {
 					slidePreviewData.y = parseInt(calcBoxOffsetTop);
 					
 					isEditing = true;
+					lastChange = Date.now();
 					//console.log("x = " + slidePreviewData.x + ", y = " + slidePreviewData.y);
 					
 				},
@@ -609,7 +632,26 @@ jQuery(document).ready(function($) {
 	}
 	
 	/* !Save button -- create a new, or update an existing slide */
-	$('#edit-controls-save').click(function() {
+	$('#edit-controls-publish').click(function() {
+		$('#edit-slide-publish-status').val('publish');
+		lastSaveState = 'publish';
+		$().saveSlide(this);
+	});
+
+	$('#edit-controls-save-draft').click(function() {
+		// draft saving can only be performed if slide is not already published
+		$('#edit-slide-publish-status').val('draft');
+
+		if ( editingSlideSortButton && $( '#' + editingSlideSortButton ).hasClass( 'slidesort-publish') ) {
+			$( '#' + editingSlideSortButton ).removeClass('slidesort-publish');
+			$( '#' + editingSlideSortButton ).addClass('slidesort-draft');
+		}
+
+		lastSaveState = 'draft';
+		$().saveSlide(this);
+	});
+
+	$.fn.saveSlide = function(caller) {
 	
 		// validate data
 		
@@ -647,7 +689,20 @@ jQuery(document).ready(function($) {
 			linkToSave = $('#slide-link-internal-id').val();
 			
 		}
-		
+
+		// check valid post statuses
+		var postStatusValid = false;
+		for (var psi = 0; psi < _total_slider_allowed_post_statuses.length; psi++) {
+			if (_total_slider_allowed_post_statuses[psi] == $('#edit-slide-publish-status').val() ) {
+				postStatusValid = true;
+			}
+		}
+
+		if (!postStatusValid) {
+			validationErrors[validationErrors.length] = _total_slider_L10n.validationInvalidPostStatus;
+		}
+
+
 		// X/Y bounds??
 		
 		if (validationErrors.length > 0)
@@ -662,12 +717,126 @@ jQuery(document).ready(function($) {
 			return false;		
 			
 		}
-		
+
+			
 		$('#edit-controls-saving').show().fadeTo(400,1);
 		
-		$('#edit-controls-save,#edit-controls-cancel').prop('disabled', 'disabled');
-		// $('#edit-controls-save').val('Saving');
+		$('#edit-controls-publish,#edit-controls-cancel').prop('disabled', 'disabled');
+		// $('#edit-controls-publish').val('Saving');
 		
+
+
+		$().performSaveAction({
+			newSlideSuccess: function(result, caller) {	
+				if (result.error) {
+					alert(result.error);
+				}
+				else {
+			
+				$('#' + editingSlideSortButton).removeClass('slidesort-selected');
+				switch ( lastSaveState ) {
+					case 'draft':
+						$('#' + editingSlideSortButton).removeClass('slidesort-publish');
+						$('#' + editingSlideSortButton).addClass('slidesort-draft');
+					break;
+					case 'publish':
+						$('#' + editingSlideSortButton).removeClass('slidesort-draft'); // publish!
+						$('#' + editingSlideSortButton).addClass('slidesort-publish');
+					break;
+				}
+				$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
+				$('#' + editingSlideSortButton).click(function() { $().clickSlideObject(this); } );
+				$('#' + editingSlideSortButton).attr('id', 'slidesort_' + result.new_id);
+				 
+				// update other IDs too
+				$('#' + editingSlideSortButton + '_text').attr('id', 'slidesort_' + result.new_id + '_text');
+				$('#slidesort_untitled_delete').attr('id', 'slidesort_' + result.new_id + '_delete');
+				$('#slidesort_untitled_delete_button').attr('id', 'slidesort_' + result.new_id + '_delete_button');					
+				
+				$('#edit-controls').fadeTo(400, 0);
+				$('#edit-controls-choose-hint').show().fadeTo(400,1);
+				window.setTimeout(function() { $().clearForm(); }, 750);
+						
+				
+				isEditing = false;
+				isEditingUntitledSlide = false;
+				editingSlideSortButton = false;
+				
+				// trigger a shuffle update with the new order, if changed, of this new item
+				if (newShouldShuffle)
+				{
+					newShouldShuffle = false;
+					$().sortSlides();
+				}
+				
+				newShouldShuffle = false;
+				
+				$().showSavedMessage();
+				
+				}
+
+			},
+			existingSlideSuccess: function(result, caller) {
+				if (result.error) {
+					alert(result.error);
+				}
+				else {
+					$('#' + editingSlideSortButton).removeClass('slidesort-selected');
+					switch ( lastSaveState ) {
+						case 'draft':
+							$('#' + editingSlideSortButton).removeClass('slidesort-publish');
+							$('#' + editingSlideSortButton).addClass('slidesort-draft');
+						break;
+						case 'publish':
+							$('#' + editingSlideSortButton).removeClass('slidesort-draft'); // publish!
+							$('#' + editingSlideSortButton).addClass('slidesort-publish');
+						break;
+					}
+					$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
+					$('#edit-controls').fadeTo(400, 0);
+					$('#edit-controls-choose-hint').show().fadeTo(400,1);
+					window.setTimeout(function() { $().clearForm(); }, 750);
+					
+					isEditing = false;
+					isEditingUntitledSlide = false;
+					editingSlideSortButton = false;
+					
+					$().showSavedMessage();
+					
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown, caller) {
+				var response = $.parseJSON(jqXHR.responseText);
+				var errorToShow = '';
+					
+				if (response != null && response.error != null)
+				{
+					errorToShow = response.error;
+				}
+				
+				alert(_total_slider_L10n.unableToSaveSlide + '\n\n' + response.error);
+				
+				$('#edit-controls-publish,#edit-controls-cancel').removeAttr('disabled');
+				$('#edit-controls-publish').val(_total_slider_L10n.publishButtonValue);
+				$('#edit-controls-saving').fadeTo(0,0).hide();		
+							
+			},
+			caller: caller
+		});		
+	
+	};
+
+	/* Actually pull the form fields and push them over to the server, to either create a new slide
+	 * or update an existing one. The calling function must validate if this is an interactive save (i.e.
+	 * not an auto-draft). Otherwise, invalid or missing values will be dropped on save by this method.
+	 */
+	$.fn.performSaveAction = function(args) {
+		/*
+		 * Pass the callback functions for newSlideSuccess, existingSlideSuccess and error in the JSON object args.
+		 */
+		
+		isCurrentlySaving = true;
+
 		if ($('.total-slider-template-draggable').length < 1 || $('.total-slider-template-draggable-parent').length < 1)
 		{
 			var calcBoxOffsetLeft = 0;
@@ -677,9 +846,8 @@ jQuery(document).ready(function($) {
 			var calcBoxOffsetLeft = $('.total-slider-template-draggable').offset().left - $('.total-slider-template-draggable-parent').offset().left;
 			var calcBoxOffsetTop  = $('.total-slider-template-draggable').offset().top - $('.total-slider-template-draggable-parent').offset().top;
 		}
-			
-		if (isEditingUntitledSlide) {
-		
+
+		if (isEditingUntitledSlide) {	
 			// create new slide
 			$.ajax({
 				type: 'POST',
@@ -690,66 +858,19 @@ jQuery(document).ready(function($) {
 					'background': slidePreviewData.background_attachment_id,
 					'link': linkToSave,
 					'title_pos_x': calcBoxOffsetLeft,
-					'title_pos_y': calcBoxOffsetTop						
+					'title_pos_y': calcBoxOffsetTop,
+					'post_status': $('#edit-slide-publish-status').val()				
 				},
 				
 				success: function(result) {
-				
-					if (result.error) {
-						alert(result.error);
-					}
-					else {
-				
-					$('#' + editingSlideSortButton).removeClass('slidesort-selected');
-					$('#' + editingSlideSortButton).click(function() { $().clickSlideObject(this); } );
-					$('#' + editingSlideSortButton).attr('id', 'slidesort_' + result.new_id);
-					 
-					// update other IDs too
-					$('#' + editingSlideSortButton + '_text').attr('id', 'slidesort_' + result.new_id + '_text');
-					$('#slidesort_untitled_delete').attr('id', 'slidesort_' + result.new_id + '_delete');
-					$('#slidesort_untitled_delete_button').attr('id', 'slidesort_' + result.new_id + '_delete_button');					
-					
-					$('#edit-controls').fadeTo(400, 0);
-					$('#edit-controls-choose-hint').show().fadeTo(400,1);
-					window.setTimeout(function() { $().clearForm(); }, 750);
-
-						
-					
-					isEditing = false;
-					isEditingUntitledSlide = false;
-					editingSlideSortButton = false;
-					
-					// trigger a shuffle update with the new order, if changed, of this new item
-					if (newShouldShuffle)
-					{
-						newShouldShuffle = false;
-						window.setTimeout(function() { $().sortSlides(); }, 1200);
-					}
-					
-					newShouldShuffle = false;
-					
-					$().showSavedMessage();
-					
-					}
+					args.newSlideSuccess(result, args.caller);
+					isCurrentlySaving = false;
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
 				
-					var response = $.parseJSON(jqXHR.responseText);
-					var errorToShow = '';
-					
-					if (response != null && response.error != null)
-					{
-						errorToShow = response.error;
-					}
-					
-					alert(_total_slider_L10n.unableToSaveSlide + '\n\n' + response.error);
-					
-					$('#edit-controls-save,#edit-controls-cancel').removeAttr('disabled');
-					$('#edit-controls-save').val(_total_slider_L10n.saveButtonValue);
-					$('#edit-controls-saving').fadeTo(0,0).hide();		
-							
-				}
-				
+					args.error(jqXHR, textStatus, errorThrown, args.caller);
+					isCurrentlySaving = false;
+				}			
 			});
 		
 		}
@@ -776,51 +897,128 @@ jQuery(document).ready(function($) {
 					'background': backgroundToSave,
 					'link': linkToSave,
 					'title_pos_x': calcBoxOffsetLeft,
-					'title_pos_y': calcBoxOffsetTop									
+					'title_pos_y': calcBoxOffsetTop,	
+					'post_status': $('#edit-slide-publish-status').val()
 				},
 				
 				success: function(result) {
-				
-					if (result.error) {
-						alert(result.error);
-					}
-					else {
-						$('#' + editingSlideSortButton).removeClass('slidesort-selected');
-						$('#edit-controls').fadeTo(400, 0);
-						$('#edit-controls-choose-hint').show().fadeTo(400,1);
-						window.setTimeout(function() { $().clearForm(); }, 750);
-						
-						isEditing = false;
-						isEditingUntitledSlide = false;
-						editingSlideSortButton = false;
-						
-						$().showSavedMessage();
-						
-					}
+					args.existingSlideSuccess(result, args.caller);	
+					isCurrentlySaving = false;
+
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-				
-					var response = $.parseJSON(jqXHR.responseText);
-					var errorToShow = '';
-					
-					if (response != null && response.error != null)
-					{
-						errorToShow = response.error;
-					}
-									
-					alert(_total_slider_L10n.unableToSaveSlide + '\n\n' + errorToShow);
-
-					$('#edit-controls-save,#edit-controls-cancel').removeAttr('disabled');
-					$('#edit-controls-save').val(_total_slider_L10n.saveButtonValue);
-					$('#edit-controls-saving').fadeTo(0,0).hide();					
-									
+					args.error(jqXHR, textStatus, errorThrown, args.caller);
+					isCurrentlySaving = false;
 				}
 				
 			});
 		
 		}
-	
-	});
+		
+	};
+
+	$.fn.saveAutoDraft = function(caller) {
+		$('#edit-controls-saving > span').html('Saving a draft&hellip;');
+		$('#edit-controls-saving').css('opacity', '1');
+		$('#edit-controls-saving').show();
+
+		autoSaveExistingStatus = $('#edit-slide-publish-status').val();
+
+		$('#edit-slide-publish-status').val('draft');
+
+
+		if ($('#slide-link-is-external').prop('checked') == true)
+		{
+			linkToSave = $('#edit-slide-link').val();
+		}
+		else if ($('#slide-link-is-internal').prop('checked') == true)
+		{
+			linkToSave = $('#slide-link-internal-id').val();
+		}
+		else {
+			linkToSave = '';
+		}	
+
+		$().performSaveAction({
+			newSlideSuccess: function(result, caller) {
+				// hook up new slide stuff
+				$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
+				$('#' + editingSlideSortButton).click(function() { $().clickSlideObject(this); } );
+				$('#' + editingSlideSortButton).attr('id', 'slidesort_' + result.new_id);
+				 
+				// update other IDs too
+				$('#' + editingSlideSortButton + '_text').attr('id', 'slidesort_' + result.new_id + '_text');
+				$('#slidesort_untitled_delete').attr('id', 'slidesort_' + result.new_id + '_delete');
+				$('#slidesort_untitled_delete_button').attr('id', 'slidesort_' + result.new_id + '_delete_button');		
+
+				$('#' + editingSlideSortButton ).removeClass( 'slidesort-unsaved' );
+
+				if ( typeof console != 'undefined') {
+					console.log( 'Total Slider: Successful auto-save of slide -- new post created.');
+				}
+
+				isEditingUntitledSlide = false;
+				editingSlideSortButton = 'slidesort_' + result.new_id;
+				$('#edit-slide-publish-status').val(autoSaveExistingStatus);
+				$('#edit-controls-saving').hide();
+				lastAutoSave = Date.now();
+				$().sortSlides();
+
+			},
+			existingSlideSuccess: function(result, caller) {
+				// not much??
+				//
+
+				$('#' + editingSlideSortButton ).removeClass( 'slidesort-unsaved' );
+				if ( typeof console != 'undefined' ) {
+					console.log( 'Total Slider: Successful auto-save of slide -- draft post updated' );
+				}
+				$('#edit-slide-publish-status').val(autoSaveExistingStatus);
+				$('#edit-controls-saving').hide();
+				lastAutoSave = Date.now();
+				$().sortSlides();
+			},
+			error: function(jqXHR, textStatus, errorThrown, caller) {
+				
+				if ( typeof console != 'undefined' ) {
+					console.log( 'Total Slider: Auto-save of draft failed -- error thrown was \'' + errorThrown  + '\''); 
+				}
+
+				$('#edit-slide-publish-status').val(autoSaveExistingStatus);
+				$('#edit-controls-saving').hide();
+			}
+		});
+	};
+
+	window.setInterval( function() {
+		if ( isEditing && editingSlideSortButton ) {
+			if ( typeof console != 'undefined' ) {
+				console.log( "Total Slider: Triggering auto-save after 30 seconds." );	
+			}
+			// only save if the last change was more recent than the last successful auto-save
+			// and if the title or description have some text
+			if ( !isCurrentlySaving && lastChange > lastAutoSave &&
+				(!
+				 ( $('#edit-slide-title').val().length < 1 && $('#edit-slide-description').val().length < 1 )
+				)
+			) {
+				if ( ! $('#' + editingSlideSortButton ).hasClass( 'slidesort-publish' ) ) {
+					$().saveAutoDraft(null);
+				}
+				else {
+					if ( typeof console != 'undefined' ) {
+						console.log( "Total Slider: Aborting auto-save, as slide currently in editing is already published." );
+					}
+				}
+			}
+			else {
+				if ( typeof console != 'undefined' ) {
+					console.log( "Total Slider: Aborting auto-save, as no changes since last auto-save, save already in progress, or slide still has blank title and description." );
+				}
+			}
+		}	    	    
+	} ,
+			30000);
 	
 	/* Cancel with esc key */
 	/*$(document).keyup(function(event) {
@@ -843,6 +1041,7 @@ jQuery(document).ready(function($) {
 				$().clearForm();
 				
 				isEditing = false;
+				$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
 				isEditingUntitledSlide = false;
 				editingSlideSortButton = false;
 				
@@ -869,7 +1068,8 @@ jQuery(document).ready(function($) {
 				$('#' + editingSlideSortButton + '_text').text(originalTitle); // restore pre-edit title
 				$('#' + editingSlideSortButton).children('.slidesort_slidebox').css('background', 'url(' + originalBackground + ')'); // restore pre-edit background
 				$('#' + editingSlideSortButton).removeClass('slidesort-selected'); // unselect
-				
+				$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
+
 				isEditing = false;
 				isEditingUntitledSlide = false;
 				editingSlideSortButton = false;
@@ -883,6 +1083,7 @@ jQuery(document).ready(function($) {
 			if (editingSlideSortButton)
 			{
 				$('#' + editingSlideSortButton).removeClass('slidesort-selected'); // unselect the button if it was selected
+				$('#' + editingSlideSortButton).removeClass('slidesort-unsaved');
 			}
 			
 			$('#' + editingSlideSortButton).children('.slidesort_slidebox').css('background', 'url(' + originalBackground + ')'); // restore pre-edit background
@@ -899,13 +1100,33 @@ jQuery(document).ready(function($) {
 	
 	});
 
+	/* !Re-enable save draft button if the user wants to 'un-publish' a slide */
+	$('#edit-slide-publish-status').change( function(e) {
+		// if current slide is published
+		if ( editingSlideSortButton && $( '#' + editingSlideSortButton ).hasClass( 'slidesort-publish' ) ) {
+			switch( $(this).val() ) {
+				case 'draft':
+					$('#edit-controls-save-draft').removeProp( 'disabled' );
+				break;
+				case 'publish':
+					$('#edit-controls-save-draft').prop('disabled', 'disabled' );
+				break;
+			}
+		}
+	});
+
 	/* !Delete slide generic function */
 	$.fn.deleteSlide = function(event, caller) {
 	
 		event.preventDefault();
 		
 		// what is our ID?
-		var slideID = $(caller).parent().parent().parent().attr('id');
+		if ( caller != null ) {
+			var slideID = $(caller).parent().parent().parent().attr('id');
+		}
+		else {
+			var slideID = editingSlideSortButton;
+		}
 		
 		if (!slideID)
 			alert(_total_slider_L10n.unableToDeleteSlideNoID);
@@ -961,8 +1182,14 @@ jQuery(document).ready(function($) {
 				
 				success: function(result) {
 				
-					$(deleteCaller).parent().parent().fadeTo(350, 0);
-					window.setTimeout(function() {$(deleteCaller).parent().parent().parent().remove();}, 380);
+					if (deleteCaller) {
+						$(deleteCaller).parent().parent().fadeTo(350, 0);
+						window.setTimeout(function() {$(deleteCaller).parent().parent().parent().remove();}, 380);
+					}
+					else {
+						$('#' + editingSlideSortButton).fadeTo(350,0);
+						window.setTimeout(function() { $('#' + editingSlideSortButton).remove(); } );
+					}
 					
 					$('#edit-controls').fadeTo(400, 0);
 					$('#edit-controls-choose-hint').show().fadeTo(400,1);
@@ -1016,6 +1243,15 @@ jQuery(document).ready(function($) {
 		$().deleteSlide(event, this);
 	
 	});
+
+	$('#edit-controls-delete-slide').click( function(event) {
+		if ( isEditingUntitledSlide ) {
+			$('#edit-controls-cancel').click();
+		}
+		else {
+			$().deleteSlide(event, null);
+		}
+	});
 	
 	/* !Help buttons */
 	$('.total-slider-help-point').click(function(event)
@@ -1054,28 +1290,28 @@ jQuery(document).ready(function($) {
 	$('#slide-link-finder').click(function() {
 	
 		$('#slide-link-is-internal').click();
-
-		if (VPM_SHOULD_WORKAROUND_16655) {
-			// workaround for https://core.trac.wordpress.org/ticket/16655
-			$('#slide-link-is-internal').prop('checked', false);
-		}
-		
+		$('#' + editingSlideSortButton).addClass('slidesort-unsaved');
 		findPosts.open();
 		isEditing = true;
+		lastChange = Date.now();
 	});
 	
 	/* !'Internal post or page' chosen for slide link */
 	$('#slide-link-is-internal').click(function() {
 		$('#slide-link-external-settings').hide();
 		$('#slide-link-internal-settings').show('fast');	
+		$('#' + editingSlideSortButton).addClass('slidesort-unsaved');
 		isEditing = true;		
+		lastChange = Date.now();
 	});
 	
 	/* !'External link' chosen for slide link */
 	$('#slide-link-is-external').click(function() {
 		$('#slide-link-internal-settings').hide();
 		$('#slide-link-external-settings').show('fast');
+		$('#' + editingSlideSortButton).addClass('slidesort-unsaved');
 		isEditing = true;			
+		lastChange = Date.now();
 	});
 	
 	/* !Shim the find post/page button to get it for the link */
@@ -1085,27 +1321,7 @@ jQuery(document).ready(function($) {
 			$('#slide-link-internal-id').val($(this).val());
 		});
 		findPosts.close();
-		
-		if (VPM_SHOULD_WORKAROUND_16655) {
-			// workaround for https://core.trac.wordpress.org/ticket/16655
-			$('#slide-link-is-internal').prop('checked', true);
-		}
-		
 	});
-	
-	if (VPM_SHOULD_WORKAROUND_16655) {
-	
-		$('#find-posts-close').click(function() {
-			// workaround for https://core.trac.wordpress.org/ticket/16655
-				$('#slide-link-is-internal').prop('checked', true);
-		});
-		
-		// workaround for https://core.trac.wordpress.org/ticket/16655
-		$('#find-posts-input').keyup(function(e){
-			if (e.which == 27) { $('#slide-link-is-internal').prop('checked', true); } // close on Escape
-		});
-	
-	}
 	
 	$().makeDraggable();
 

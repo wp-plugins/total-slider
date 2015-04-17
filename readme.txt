@@ -2,9 +2,9 @@
 Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.totalslider.com/donate/
 Tags: slider, slideshow, rotation, rotator
-Requires at least: 3.3.1
-Tested up to: 4.0
-Stable tag: 1.1.5
+Requires at least: 4.0
+Tested up to: 4.1.1
+Stable tag: 2.0 
 License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
@@ -58,6 +58,9 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 2.0 =
+* Major new release, featuring drafts, auto-saving drafts and improved behind-the-scenes data storage.
+
 = 1.1.5 =
 * Fixes compatibility with WordPress 4.0. No longer requires you to enter a slide description if you do not want one.
 
@@ -100,6 +103,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.0 =
+
+Major new release featuring drafts, auto-save and an updated data format. Please back up your database!
 
 = 1.1.5 =
 
