@@ -1,15 +1,17 @@
 <?php
 /*
-Total Slider Ajax Interface
-	
-This file is invoked by Total Slider when the user is manipulating
-slides in the edit interface. It is responsible for receiving commands
-from the edit interface, executing them (invoking the Total_Slide_Group class)
-and returning JSON to the interface on success, or failure.
+ * Total Slider Ajax Interface
+ * 
+ * This file is invoked by Total Slider when the user is manipulating
+ * slides in the edit interface. It is responsible for receiving commands
+ * from the edit interface, executing them (invoking the Total_Slide_Group class)
+ * and returning JSON to the interface on success, or failure.
+ *
+ */
 
 /* ----------------------------------------------*/
 
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -25,6 +27,9 @@ and returning JSON to the interface on success, or failure.
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+require( dirname( __FILE__ ) . '/class.ajax-interface-tools.php' );
+$tools = new Total_Slider_Ajax_Interface_Tools;
 
 ini_set( 'magic_quotes_gpc', 'Off' );
 
@@ -53,13 +58,14 @@ if ( ! array_key_exists( 'group', $_GET ) && 'getSlideGroups' == $_GET['action']
 		header( 'Content-Type: application/json' );
 		echo json_encode(
 			array(
-				'error' => __( 'Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider' )
+				'error' => __( 'Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total-slider' )
 			)
 		);
 		die();
 	}
 	
-	$groups = get_option( 'total_slider_slide_groups' );
+	$groups = get_terms( 'total_slider_slide_group', array( 'hide_empty' => false ) );
+
 	
 	$results = array();
 	$i = 0;
@@ -91,7 +97,7 @@ if ( empty( $slug ) ) {
 	header( 'Content-Type: application/json' );
 	echo json_encode(
 		array(
-			'error' => __('You did not supply the slide group to which this action should be applied.', 'total_slider')
+			'error' => __('You did not supply the slide group to which this action should be applied.', 'total-slider')
 		)
 	);
 	die();
@@ -104,7 +110,7 @@ try {
 		header( 'Content-Type: application/json' );
 		echo json_encode(
 			array(
-				'error' => __('Could not load the selected Slide Group. Does it exist?', 'total_slider')
+				'error' => __('Could not load the selected Slide Group. Does it exist?', 'total-slider')
 			)
 		);
 		die();
@@ -132,7 +138,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider')
+					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total-slider')
 				)
 			);
 			die();
@@ -144,13 +150,14 @@ switch ( $_GET['action'] )
 			!array_key_exists( 'title_pos_y', $_POST ) ||
 			!array_key_exists( 'background', $_POST ) ||
 			!array_key_exists( 'title', $_POST ) ||
-			!array_key_exists( 'link', $_POST )
+			!array_key_exists( 'link', $_POST ) ||
+			!array_key_exists( 'post_status', $_POST )
 		) {
 			header( 'HTTP/1.0 400 Bad Request' );
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('You have not supplied all of the required data.', 'total_slider')
+					'error' => __('You have not supplied all of the required data.', 'total-slider')
 				)
 			);
 			die();				
@@ -171,87 +178,106 @@ switch ( $_GET['action'] )
 			
 			A blank string should never get here, though, because of the casting
 			to int above. A blank string will be cast to decimal 0, which is OK.
-		*/
-		if ( empty($_POST['title'] ) || 
-			(
-				empty($_POST['title_pos_x']) && !is_numeric($_POST['title_pos_x'])
-			)
-			|| 
-			(
-				empty($_POST['title_pos_y']) && !is_numeric($_POST['title_pos_y'])
-			)
-		) {
-			header( 'HTTP/1.0 400 Bad Request' );
-			header( 'Content-Type: application/json' );
-			echo json_encode(
-				array(
-					'error' => __('You have not supplied all of the required data.', 'total_slider')
+		 */
+		if ( 'publish' == $_POST['post_status'] ) {
+			if ( empty($_POST['title'] ) || 
+				(
+					empty($_POST['title_pos_x']) && !is_numeric($_POST['title_pos_x'])
 				)
-			);
-			die();			
-		}
-		
-		if ( ! empty( $_POST['background'] ) ) {
-			if (is_numeric($_POST['background'])) {
-				if ( (int) $_POST['background'] != $_POST['background'] ) {
-					header( 'HTTP/1.0 400 Bad Request' );
-					header( 'Content-Type: application/json' );
-					echo json_encode(
-						array(
-							'error' => __('Invalid attachment ID for the specified background.', 'total_slider')
-						)
-					);
-					die();	
-				}
-			}
-			else if ( ! $g->validate_url( $_POST['background'] ) ) {
+				|| 
+				(
+					empty($_POST['title_pos_y']) && !is_numeric($_POST['title_pos_y'])
+				)
+			) {
 				header( 'HTTP/1.0 400 Bad Request' );
 				header( 'Content-Type: application/json' );
 				echo json_encode(
 					array(
-						'error' => __('Invalid URL format for the specified background URL.', 'total_slider')
+						'error' => __('You have not supplied all of the required data.', 'total-slider')
 					)
 				);
 				die();			
-			}	
+			}
+
+			if ( ! empty( $_POST['background'] ) ) {
+				if (is_numeric($_POST['background'])) {
+					if ( (int) $_POST['background'] != $_POST['background'] ) {
+						header( 'HTTP/1.0 400 Bad Request' );
+						header( 'Content-Type: application/json' );
+						echo json_encode(
+							array(
+								'error' => __('Invalid attachment ID for the specified background.', 'total-slider')
+							)
+						);
+						die();	
+					}
+				}
+				else if ( ! $g->validate_url( $_POST['background'] ) ) {
+					header( 'HTTP/1.0 400 Bad Request' );
+					header( 'Content-Type: application/json' );
+					echo json_encode(
+						array(
+							'error' => __('Invalid URL format for the specified background URL.', 'total-slider')
+						)
+					);
+					die();			
+				}	
+			}
+
+			if ( ! empty($_POST['link'] ) ) {
+				if ( is_numeric( $_POST['link'] ) ) {
+					$_POST['link'] = (int) $_POST['link'];
+
+					if ( $_POST['link'] < 1 ) {
+						header( 'HTTP/1.0 400 Bad Request' );
+						header( 'Content-Type: application/json' );
+						echo json_encode(
+							array(
+								'error' => __('The post ID for the specified slide link is not valid.', 'total-slider')
+							)
+						);
+						die();					
+					}
+				}
+				else {
+					if ( ! $g->validate_url( $_POST['link'] ) ) {
+						header( 'HTTP/1.0 400 Bad Request' );
+						header( 'Content-Type: application/json' );
+						echo json_encode(
+							array(
+								'error' => __('Invalid URL format for the specified link URL.', 'total-slider')
+							)
+						);
+						die();	
+					}
+				}
+			}
 		}
-		
-		if ( ! empty($_POST['link'] ) ) {
-			if ( is_numeric( $_POST['link'] ) ) {
-				$_POST['link'] = (int) $_POST['link'];
-				
-				if ( $_POST['link'] < 1 ) {
-					header( 'HTTP/1.0 400 Bad Request' );
-					header( 'Content-Type: application/json' );
-					echo json_encode(
-						array(
-							'error' => __('The post ID for the specified slide link is not valid.', 'total_slider')
-						)
-					);
-					die();					
-				}
-			}
-			else {
-				if ( ! $g->validate_url( $_POST['link'] ) ) {
-					header( 'HTTP/1.0 400 Bad Request' );
-					header( 'Content-Type: application/json' );
-					echo json_encode(
-						array(
-							'error' => __('Invalid URL format for the specified link URL.', 'total_slider')
-						)
-					);
-					die();	
-				}
-			}
+
+		// invalid post status
+		if ( ! in_array( $_POST['post_status'], Total_Slider::$allowed_post_statuses ) ) { 
+			header( 'HTTP/1.0 400 Bad Request' );
+			header( 'Content-Type: application/json' );
+			echo json_encode(
+				array(
+					'error' => sprintf( __( 'The slide cannot be created with the \'%s\' status, as this is not supported by %s.', 'total-slider' ), esc_html( $_POST['post_status'] ), 'Total Slider' )
+				)
+			);
 		}
 		
 		$_POST['title'] = stripslashes( $_POST['title'] );
 		$_POST['description'] = stripslashes( $_POST['description'] );
+
+		// WP will not do any work if content, title and excerpt are all empty. We need to handle this and not actually do a save in this instance
+		if ( empty( $_POST['title'] ) && empty( $_POST['description'] ) ) {
+			$tools->maybe_dump_wp_error( sprintf( __('%s will not attempt a draft save if the title and description are both empty.', 'total-slider' ), 'Total Slider' ) );
+			die();
+		}
 		
 		// do the work
-		$result = $g->new_slide( $_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y'] );
+		$result = $g->new_slide( $_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y'], $_POST['post_status'] );
 		
-		if ( $result ) {
+		if ( is_int( $result ) ) {
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
@@ -260,14 +286,8 @@ switch ( $_GET['action'] )
 			);
 			die();
 		}
-		else {
-			header( 'HTTP/1.0 500 Internal Server Error' );
-			header( 'Content-Type: application/json' );
-			echo json_encode(
-				array(
-					'error' => __('The create slide operation failed at the server.', 'total_slider')
-				)
-			);
+		else if ( is_a( $result, 'WP_Error' ) ) {
+			$tools->maybe_dump_wp_error( $result );
 			die();
 		}
 	
@@ -280,7 +300,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider')
+					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total-slider')
 				)
 			);
 			die();
@@ -292,7 +312,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' =>  __('You have not supplied the ID to look up.', 'total_slider')
+					'error' =>  __('You have not supplied the ID to look up.', 'total-slider')
 				)
 			);
 			die();				
@@ -306,13 +326,18 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('You have not supplied the ID to look up.', 'total_slider')
+					'error' => __('You have not supplied the ID to look up.', 'total-slider')
 				)
 			);
 			die();				
 		}
 		
 		$result = $g->get_slide( $_POST['id'] );
+
+		if ( is_a( $result, 'WP_Error' ) ) {
+			$tools->maybe_dump_wp_error( $result );
+			die();	
+		}
 		
 		if ( is_array( $result ) && count( $result ) > 0 ) {
 		
@@ -328,12 +353,13 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('Specified slide ID could not be found. It may have been already deleted.', 'total_slider')
+					'error' => __('Specified slide ID could not be found. It may have been already deleted.', 'total-slider')
 				)
 			);
 			die();	
 		}
 		
+
 	
 	break;
 	
@@ -344,7 +370,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider')
+					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total-slider')
 				)
 			);
 			die();
@@ -352,18 +378,20 @@ switch ( $_GET['action'] )
 		
 		// error out if the POST format isn't right
 		if (
-			!array_key_exists('title_pos_x', $_POST) ||
-			!array_key_exists('title_pos_y', $_POST) ||
-			!array_key_exists('background', $_POST) ||
-			!array_key_exists('title', $_POST) ||
-			!array_key_exists('link', $_POST) ||
-			!array_key_exists('id', $_POST)
+			!array_key_exists( 'title_pos_x', $_POST ) ||
+			!array_key_exists( 'title_pos_y', $_POST ) ||
+			!array_key_exists( 'background', $_POST ) ||
+			!array_key_exists( 'title', $_POST ) ||
+			!array_key_exists( 'link', $_POST ) ||
+			!array_key_exists( 'id', $_POST ) ||
+			!array_key_exists( 'post_status', $_POST )
+
 		) {
 			header( 'HTTP/1.0 400 Bad Request' );
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('You have not supplied all of the required data.', 'total_slider')
+					'error' => __('You have not supplied all of the required data.', 'total-slider')
 				)
 			);
 			die();				
@@ -371,13 +399,14 @@ switch ( $_GET['action'] )
 		
 		// we need the slide ID
 		$_POST['id'] = preg_replace( '[^0-9a-zA-Z_]', '', $_POST['id'] );
+		//TODO now numeric for sure
 		
 		if ( empty( $_POST['id'] ) ) {
 			header( 'HTTP/1.0 400 Bad Request' );
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('You have not supplied the ID to look up.', 'total_slider')
+					'error' => __('You have not supplied the ID to look up.', 'total-slider')
 				)
 			);
 			die();				
@@ -398,86 +427,100 @@ switch ( $_GET['action'] )
 			A blank string should never get here, though, because of the casting
 			to int above. A blank string will be cast to decimal 0, which is OK.
 		*/
-		if ( empty( $_POST['title'] ) || 
-			(
-				empty( $_POST['title_pos_x'] ) &&  ! is_numeric( $_POST['title_pos_x'] )
-			)
-			|| 
-			(
-				empty( $_POST['title_pos_y'] ) &&  ! is_numeric( $_POST['title_pos_y'] )
-			)
-		)
-		{
-			header( 'HTTP/1.0 400 Bad Request' );
-			header( 'Content-Type: application/json' );
-			echo json_encode(
-				array(
-					'error' => __('You have not supplied all of the required data.', 'total_slider')
+		if ( 'publish' == $_POST['post_status'] ) {
+			if ( empty( $_POST['title'] ) || 
+				(
+					empty( $_POST['title_pos_x'] ) &&  ! is_numeric( $_POST['title_pos_x'] )
 				)
-			);
-			die();			
-		}
-		
-		if ( ! empty($_POST['background'] ) ) {
-			if ( is_numeric($_POST['background'] ) ) {
-				if ( (int) $_POST['background'] != $_POST['background'] ) {
-					header( 'HTTP/1.0 400 Bad Request' );
-					header( 'Content-Type: application/json' );
-					echo json_encode(
-						array(
-							'error' => __('Invalid attachment ID for the specified background.', 'total_slider')
-						)
-					);
-					die();	
-				}
-			}
-			else if (!$g->validate_url( $_POST['background'] ) ) {
+				|| 
+				(
+					empty( $_POST['title_pos_y'] ) &&  ! is_numeric( $_POST['title_pos_y'] )
+				)
+			)
+			{
 				header( 'HTTP/1.0 400 Bad Request' );
 				header( 'Content-Type: application/json' );
 				echo json_encode(
 					array(
-						'error' => __('Invalid URL format for the specified background URL.', 'total_slider')
+						'error' => __('You have not supplied all of the required data.', 'total-slider')
 					)
 				);
 				die();			
-			}	
-		}
-		
-		if ( ! empty($_POST['link'] ) ) {
-			if ( is_numeric($_POST['link'] ) ) {
-				$_POST['link'] = (int) $_POST['link'];
-				
-				if ( $_POST['link'] < 1 ) {
+			}
+
+			if ( ! empty($_POST['background'] ) ) {
+				if ( is_numeric($_POST['background'] ) ) {
+					if ( (int) $_POST['background'] != $_POST['background'] ) {
+						header( 'HTTP/1.0 400 Bad Request' );
+						header( 'Content-Type: application/json' );
+						echo json_encode(
+							array(
+								'error' => __('Invalid attachment ID for the specified background.', 'total-slider')
+							)
+						);
+						die();	
+					}
+				}
+				else if (!$g->validate_url( $_POST['background'] ) ) {
 					header( 'HTTP/1.0 400 Bad Request' );
 					header( 'Content-Type: application/json' );
 					echo json_encode(
 						array(
-							'error' => __('The post ID for the specified slide link is not valid.', 'total_slider')
+							'error' => __('Invalid URL format for the specified background URL.', 'total-slider')
 						)
 					);
-					die();					
-				}
+					die();			
+				}	
 			}
-			else {
-				if ( ! $g->validate_url( $_POST['link'] ) ) {
-					header( 'HTTP/1.0 400 Bad Request' );
-					header( 'Content-Type: application/json' );
-					echo json_encode(
-						array(
-							'error' => __('Invalid URL format for the specified link URL.', 'total_slider')
-						)
-					);
-					die();	
+
+			if ( ! empty($_POST['link'] ) ) {
+				if ( is_numeric($_POST['link'] ) ) {
+					$_POST['link'] = (int) $_POST['link'];
+
+					if ( $_POST['link'] < 1 ) {
+						header( 'HTTP/1.0 400 Bad Request' );
+						header( 'Content-Type: application/json' );
+						echo json_encode(
+							array(
+								'error' => __('The post ID for the specified slide link is not valid.', 'total-slider')
+							)
+						);
+						die();					
+					}
+				}
+				else {
+					if ( ! $g->validate_url( $_POST['link'] ) ) {
+						header( 'HTTP/1.0 400 Bad Request' );
+						header( 'Content-Type: application/json' );
+						echo json_encode(
+							array(
+								'error' => __('Invalid URL format for the specified link URL.', 'total-slider')
+							)
+						);
+						die();	
+					}
 				}
 			}
 		}
+
+		// invalid post status
+		if ( ! in_array( $_POST['post_status'], Total_Slider::$allowed_post_statuses ) ) { 
+			header( 'HTTP/1.0 400 Bad Request' );
+			header( 'Content-Type: application/json' );
+			echo json_encode(
+				array(
+					'error' => sprintf( __( 'The slide cannot be created with the \'%s\' status, as this is not supported by %s.', 'total-slider' ), esc_html( $_POST['post_status'] ), 'Total Slider' )
+				)
+			);	
+		}
+	
 		
 		$_POST['title'] = stripslashes( $_POST['title'] );
 		$_POST['description'] = stripslashes( $_POST['description'] );
 
-		$result = $g->update_slide( $_POST['id'], $_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y'] );
+		$result = $g->update_slide( $_POST['id'], $_POST['title'], $_POST['description'], $_POST['background'], $_POST['link'], $_POST['title_pos_x'], $_POST['title_pos_y'], $_POST['post_status'] );
 		
-		if ( $result ) {
+		if ( $result && is_int( $result ) ) {
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
@@ -486,12 +529,16 @@ switch ( $_GET['action'] )
 			);
 			die();
 		}
+		else if ( is_a( $result, 'WP_Error' ) ) {
+			$tools->maybe_dump_wp_error( $result );
+			die();
+		}
 		else {
 			header( 'HTTP/1.0 500 Internal Server Error' );
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('The update slide operation failed at the server.', 'total_slider')
+					'error' => __('The update slide operation failed at the server. No WP_Error information is available.', 'total-slider')
 				)
 			);
 			die();
@@ -509,7 +556,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider')
+					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total-slider')
 				)
 			);
 			die();
@@ -521,7 +568,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('The new slide order was not specified, or there were no items within it.', 'total_slider')
+					'error' => __('The new slide order was not specified, or there were no items within it.', 'total-slider')
 				)
 			);
 			die();
@@ -532,7 +579,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('The new slide order was not specified, or there were no items within it.', 'total_slider')
+					'error' => __('The new slide order was not specified, or there were no items within it.', 'total-slider')
 				)
 			);
 			die();			
@@ -549,7 +596,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('The new slide order is missing one or more current slides. Cannot save the new order, or slides would be lost. Please reload the page to ensure all current slides are in the sorting area and try sorting again.', 'total_slider')
+					'error' => __('The new slide order is missing one or more current slides. Cannot save the new order, or slides would be lost. Please reload the page to ensure all current slides are in the sorting area and try sorting again.', 'total-slider')
 				)
 			);
 			die();				
@@ -568,7 +615,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('The sort slide operation failed at the server.', 'total_slider')
+					'error' => __('The sort slide operation failed at the server.', 'total-slider')
 				)
 			);
 			die();			
@@ -583,7 +630,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total_slider')
+					'error' => __('Your user does not have the required permission level. Are you sure you are still logged in to the WordPress dashboard?', 'total-slider')
 				)
 			);
 			die();
@@ -595,7 +642,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('You have not supplied the ID to delete.', 'total_slider')
+					'error' => __('You have not supplied the ID to delete.', 'total-slider')
 				)
 			);
 			die();
@@ -609,7 +656,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __( 'You have not supplied the ID to delete.', 'total_slider' )
+					'error' => __( 'You have not supplied the ID to delete.', 'total-slider' )
 				)
 			);
 			die();				
@@ -631,7 +678,7 @@ switch ( $_GET['action'] )
 			header( 'Content-Type: application/json' );
 			echo json_encode(
 				array(
-					'error' => __('The delete slide operation failed at the server. Perhaps it has already been deleted by someone else.', 'total_slider')
+					'error' => __('The delete slide operation failed at the server. Perhaps it has already been deleted by someone else.', 'total-slider')
 				)
 			);		
 			die();

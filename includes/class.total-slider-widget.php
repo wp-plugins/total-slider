@@ -1,6 +1,9 @@
 <?php
+/*
+ * This file contains the Total_Slider_Widget class, used for regular runtime rendering of Slide Groups.
+ */
 
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -19,47 +22,115 @@
 
 
 
+/**
+ * Class: Responsible for allowing the user to place the slider in a 'sidebar' in their theme. Invokes the Template for rendering.
+ *
+ * This widget class also defines a minimalist API for the Slider Template to display the correct data for this Slide Group.
+ *
+ * @see WP_Widget
+ */
 class Total_Slider_Widget extends WP_Widget {
-/*
-	The Total Slider Widget is responsible for allowing the user to place the slider in any
-	‘sidebar’ defined in their theme and for invoking the Slider template file for displaying
-	the slides.
-
-	This widget class also defines a minimalist API for the Slider template files to use to display
-	the slides.
-*/
 
 	/*
 		These hold the data for the current slide we are working with.
 
 		The template file accesses these indirectly, through the the_… and get_the_… functions.
 	*/
+	
+	/**
+	 * Stores all of the slides in this Group.
+	 *
+	 * @var array
+	 */
 	private $slides; // stores all of the slides in this group
+
+
+	/**
+	 * has_slides requires access to the Widget instance data.
+	 *
+	 * @var array
+	 * @see WP_Widget
+	 */
 	private $instance; // has_slides needs access to the instance data
+
+	/**
+	 * The slide title.
+	 *
+	 * @var string
+	 */
 	protected $slide_title;
+
+	/**
+	 * The slide description.
+	 *
+	 * @var string
+	 */
 	protected $slide_description;
+
+	/**
+	 * The slide background image URL.
+	 *
+	 * @var string
+	 */
 	protected $slide_background_url;
+
+	/**
+	 * The slide's link URL.
+	 *
+	 * @var string
+	 */
 	protected $slide_link;
+
+	/**
+	 * The slide description box's X offset in pixels.
+	 *
+	 * @var integer
+	 */
 	protected $slide_x;
+	
+	/**
+	 * The slide description box's Y offset in pixels.
+	 *
+	 * @var integer
+	 */
 	protected $slide_y;
+
+	/**
+	 * The slide identifier string.
+	 *
+	 * @var string
+	 */
 	protected $slide_identifier;
+
+	/**
+	 * The iteration count for the Slide Group rendering process.
+	 *
+	 * @var integer
+	 */
 	protected $slider_iteration = 0;
 
+	/**
+	 * A reference to this widget's Slide Group object, used to get slides.
+	 *
+	 * @var Total_Slide_Group|boolean
+	 */
+	protected $slide_group = false;
 
+	/**
+	 * Calls the WP_Widget constructor.
+	 *
+	 */
 	public function __construct() {
-	/*
-		Constructor, merely calls the WP_Widget constructor.
-	*/
 		parent::__construct( false, 'Total Slider' );
 	}
 
+	/**
+	 * Render the widget output. Invoke the Slide Group Template file to perform the bulk of the work.
+	 *
+	 * @param array $args
+	 * @param array $instance
+	 */
 	public function widget( $args, $instance ) {
-	/*
-		The widget function is responsible for rendering the widget's output. In the case
-		of Total Slider Widget, this will invoke the Slider template file to output the slides
-		to the desired widget area.
-	*/
-
 
 		$this->instance = $instance;
 
@@ -75,23 +146,23 @@ class Total_Slider_Widget extends WP_Widget {
 		$this->slider_iteration = 0;
 
 		// determine the correct template to use
-		$group = new Total_Slide_Group( Total_Slider::sanitize_slide_group_slug( $this->instance['groupSlug'] ) );
-		if ( ! $group->load() ) {
-			_e( '<strong>Total Slider:</strong> Could not find the selected slide group to show. Does it still exist?', 'total_slider' );
+		$this->slide_group = new Total_Slide_Group( Total_Slider::sanitize_slide_group_slug( $this->instance['groupSlug'] ) );
+		if ( ! $this->slide_group->load() ) {
+			_e( '<strong>Total Slider:</strong> Could not find the selected slide group to show. Does it still exist?', 'total-slider' );
 			return;
 		}
 		
 		try {
-			$tpl = new Total_Slider_Template( $group->template, $group->templateLocation );	
+			$tpl = new Total_Slider_Template( $this->slide_group->template, $this->slide_group->templateLocation );	
 		}
 		catch ( Exception $e ) {
-			_e( '<strong>Total Slider:</strong> Unable to load the template for this slide group.', 'total_slider' );
+			_e( '<strong>Total Slider:</strong> Unable to load the template for this slide group.', 'total-slider' );
 			if ( is_user_logged_in() && current_user_can( 'publish_posts') ) {
 				echo ' <em>' . esc_html( $e->getMessage() ) . '</em>';
 			}
 			return;
 		}
-		
+
 		$general_options = get_option('total_slider_general_options');
 		
 		// only enqueue template if relevant option is set (fixes #29)
@@ -102,14 +173,14 @@ class Total_Slider_Widget extends WP_Widget {
 		) {
 			// enqueue CSS and JS
 			wp_register_style(
-				'total-slider-' . esc_attr( $group->template ),					/* handle */
-				$tpl->css_uri(),												/* src */
-				array(),														/* deps */
+				'total-slider-' . esc_attr( $this->slide_group->template ),			/* handle */
+				$tpl->css_uri(),								/* src */
+				array(),									/* deps */
 				date( "YmdHis", @filemtime($tpl->css_path() ) ),				/* ver */
-				'all'															/* media */	
+				'all'										/* media */	
 			);
 			
-			wp_enqueue_style( 'total-slider-' . esc_attr($group->template) );
+			wp_enqueue_style( 'total-slider-' . esc_attr($this->slide_group->template) );
 	
 			
 			// load .min.js if available, if SCRIPT_DEBUG is not true in wp-config.php
@@ -125,16 +196,16 @@ class Total_Slider_Widget extends WP_Widget {
 			}
 			
 			wp_register_script(	
-					'total-slider-' . esc_attr($group->template), 				/* handle */
-					$js_uri,													/* src */
+					'total-slider-' . esc_attr($this->slide_group->template), 		/* handle */
+					$js_uri,								/* src */
 					array(
 						'jquery'
-					),															/* deps */
-					date( 'YmdHis', @filemtime( $js_path) ),					/* ver */
-					true														/* in_footer */		
+					),									/* deps */
+					date( 'YmdHis', @filemtime( $js_path) ),				/* ver */
+					true									/* in_footer */		
 			);
 			
-			wp_enqueue_script( 'total-slider-' . esc_attr($group->template) );
+			wp_enqueue_script( 'total-slider-' . esc_attr($this->slide_group->template) );
 		}
 		
 		$s = &$this; // $s is used by the theme to call our functions to actually display the data
@@ -146,26 +217,39 @@ class Total_Slider_Widget extends WP_Widget {
 
 	}
 
+	/**
+	 * Print out the Widget's editing form, which allows the user to pick a Slide Group.
+	 *
+	 * @param array $instance
+	 */
 	public function form( $instance ) {
-	/*
-		The form function defines the settings form for the widget.
-
-		In our case, we will allow the user to pick which Slide Group this widget is responsible
-		for displaying.
-	*/
-
-	?><p><?php _e( 'Choose a slide group for this widget to show:', 'total_slider' ); ?></p>
+	?><p><?php _e( 'Choose a slide group for this widget to show:', 'total-slider' ); ?></p>
 
 	<select id="<?php echo $this->get_field_id( 'groupSlug' ); ?>" name="<?php echo $this->get_field_name( 'groupSlug' ); ?>">
-		<option value="**INVALID**" disabled="disabled" selected="selected"><?php _e( 'Select a group', 'total_slider' ); ?></option>
+		<option value="**INVALID**" disabled="disabled" selected="selected"><?php _e( 'Select a group', 'total-slider' ); ?></option>
 		<?php
 
 			// find all the slide groups and offer them for the widget
+			$args = array(
+				'hide_empty'   => false,
+			);
+	
+			$groups = get_terms( 'total_slider_slide_group', $args );
 
-			$slide_groups = get_option( 'total_slider_slide_groups' );
+			$slide_groups = array();
+			$n = 0;
+
+			if ( is_array( $groups ) && count( $groups ) > 0 ) {
+				foreach( $groups as $g ) {
+					$slide_groups[$n] = new Total_Slide_Group( $g->slug );
+					$slide_groups[$n]->load();
+					++$n;
+				}
+			}
+
 			$slide_templates = array();
 
-			if ( is_array( $slide_groups ) && count( $slide_groups ) > 0 ) {
+			if ( count( $slide_groups ) > 0 ) {
 				foreach( $slide_groups as $group ) {
 					?><option value="<?php echo esc_attr($group->slug);?>"
 						<?php if ( array_key_exists('groupSlug', $instance ) ):
@@ -186,11 +270,13 @@ class Total_Slider_Widget extends WP_Widget {
 
 	}
 
+	/**
+	 * Update the Widget settings with the new selected Slide Group.
+	 *
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 */
 	public function update( $new_instance, $old_instance ) {
-	/*
-		Update the widget's settings with the new selected slide group from the form()
-	*/
-
 		if ( '**INVALID**' != $new_instance['groupSlug'] ) {
 
 			return array( 
@@ -203,47 +289,47 @@ class Total_Slider_Widget extends WP_Widget {
 
 	}
 
+	/**
+	 * Return the number of slides in this Slide Group.
+	 *
+	 * Can also be used to test if there are any slides to show at all.
+	 *
+	 * @return integer
+	 *
+	 */
 	public function slides_count()
 	{
-	/*
-		Return the number of slides in this slide group.
-
-		Can also be used by templates to test if there are any slides to show at all,
-		and, for example, not output the starting <ul>.
-	*/
-
 		if ( ! is_array($this->slides ) )
 		{
-			$this->slides = get_option( 'total_slider_slides_' . Total_Slider::sanitize_slide_group_slug( $this->instance['groupSlug'] ) );
-			$this->slides = array_values( $this->slides );
+			$this->slides = $this->slide_group->get_slides();
 		}
 
 		return count( $this->slides );
 
 	}
 	
+	/**
+	 * Allows the template to be aware of whether it is running at runtime (viewing), or at editing time. Returns true here.
+	 *
+	 * @return boolean
+	 *
+	 */
 	public function is_runtime()
 	{
-	/*
-		Allows the template to be aware of whether it is running at runtime (viewing as part of the
-		actual site): 'true', or at edit-time (the user is editing slides in the admin interface, and
-		the template is executing as a preview): 'false'.
-	*/
-	
+
 		return true;
 		
 	}
 
 
+	/**
+	 * An iterator for the purposes of Slider Template files. Loads the next slide in, preparing other methods to spit out this Slide's information.
+	 *
+	 * @return boolean
+	 *
+	 */
 	public function has_slides()
 	{
-	/*
-		Behaves as an iterator for the purposes of slider template files. It loads
-		in the next slide, readying the other functions below for returning
-		the data from this particular slide to the theme.
-
-
-	*/
 
 		if ( ! $this->instance )
 		{
@@ -252,8 +338,7 @@ class Total_Slider_Widget extends WP_Widget {
 		}
 
 		if ( ! is_array( $this->slides ) || count( $this->slides ) < 1 ) {
-			$this->slides = get_option( 'total_slider_slides_' . Total_Slider::sanitize_slide_group_slug( $this->instance['groupSlug'] ) );
-			$this->slides = array_values( $this->slides );
+			$this->slides = $this->slide_group->get_slides();
 		}
 
 		// on which slide should we work? does it exist?
@@ -304,55 +389,73 @@ class Total_Slider_Widget extends WP_Widget {
 
 	}
 
+	/**
+	 * Print the sanitized slide title.
+	 *
+	 * @return void 
+	 *
+	 */
 	public function the_title() {
-	/*
-		Print the slide title to output, having sanitised it.
-	*/
 
 		echo $this->get_the_title();
 
 	}
 
+	/**
+	 * Return the sanitized slide title.
+	 *
+	 * @return string
+	 *
+	 */
 	public function get_the_title() {
-	/*
-		Return the slide title, having sanitised it.
-	*/
 
 		return esc_html( apply_filters( 'total-slider_slide_title', $this->slide_title ) );
 
 	}
 
+	/**
+	 * Print the sanitized slide description.
+	 *
+	 * @return void
+	 *
+	 */
 	public function the_description() {
-	/*
-		Print the slide description to output, having sanitised it.
-	*/
 
 		echo $this->get_the_description();
 
 	}
 
+	/**
+	 * Return the sanitized slide description.
+	 *
+	 * @return string
+	 *
+	 */
 	public function get_the_description() {
-	/*
-		Return the slide description, having sanitised it.
-	*/
 
 		return esc_html( apply_filters ( 'total-slider_slide_description', $this->slide_description ) );
 
 	}
 
+	/**
+	 * Print the sanitized background image URL.
+	 *
+	 * @return void
+	 *
+	 */
 	public function the_background_url() {
-	/*
-		Print the background URL to output, having sanitised it.
-	*/
 
 		echo $this->get_the_background_url();
 
 	}
 
+	/**
+	 * Return the sanitized background image URL.
+	 *
+	 * @return string
+	 *
+	 */
 	public function get_the_background_url() {
-	/*
-		Return the background URL, having sanitisied it.
-	*/
 
 		if ( is_numeric( $this->slide_background_url ) )
 		{
@@ -368,19 +471,25 @@ class Total_Slider_Widget extends WP_Widget {
 
 	}
 
+	/**
+	 * Print the sanitized slide link URL.
+	 *
+	 * @return void
+	 *
+	 */
 	public function the_link() {
-	/*
-		Print the slide link URL to output, having sanitised it.
-	*/
 
 		echo $this->get_the_link();
 
 	}
 
+	/**
+	 * Return the sanitized slide link URL.
+	 *
+	 * @return string
+	 *
+	 */
 	public function get_the_link() {
-	/*
-		Return the slide link URL, having sanitised it.
-	*/
 
 		if ( is_numeric( $this->slide_link ) ) {
 			$link_post = (int) $this->slide_link;
@@ -392,65 +501,84 @@ class Total_Slider_Widget extends WP_Widget {
 
 	}
 
+	/**
+	 * Print the sanitized X coordinate.
+	 *
+	 * @return void
+	 */
 	public function the_x() {
-	/*
-		Print the X coordinate to the output, having sanitised it.
-	*/
 
 		echo $this->get_the_x();
 
 	}
 
+	/**
+	 * Return the sanitized X coordinate.
+	 *
+	 * @return integer
+	 *
+	 */
 	public function get_the_x() {
-	/*
-		Return the X coordinate, having sanitised it.
-	*/
 
 		return intval ( apply_filters( 'total-slider_slide_x', $this->slide_x ), 10 /* decimal */ );
 
 	}
 
+	/**
+	 * Print the sanitized Y coordinate.
+	 *
+	 * @return void
+	 *
+	 */
 	public function the_y() {
-	/*
-		Print the Y coordinate to the output, having sanitised it.
-	*/
 
 		echo $this->get_the_y();
 
 	}
 
+	/**
+	 * Return the sanitized Y coordinate.
+	 *
+	 * @return integer
+	 *
+	 */
 	public function get_the_y() {
-	/*
-		Return the Y coordinate, having sanitised it.
-	*/
 
 		return intval ( apply_filters( 'total-slider_slide_y', $this->slide_y ), 10 /* decimal */ );
 
 	}
 
+	/**
+	 * Print the sanitized slide identifier.
+	 *
+	 * @return void
+	 *
+	 */
 	public function the_identifier() {
-	/*
-		Print the slide identifier to output, having sanitised it.
-	*/
 
 		echo $this->get_the_identifier();
 
 	}
 
+	/**
+	 * Return the sanitized slide identifier.
+	 *
+	 * @return string 
+	 *
+	 */
 	public function get_the_identifier() {
-	/*
-		Return the slide identifier to output, having sanitised it.
-	*/
 
 		return esc_attr( apply_filters( 'total-slider_slide_identifier', $this->slide_identifier ) );
 
 	}
 
+	/**
+	 * Return the number of slides we have been through so far.
+	 *
+	 * @return integer
+	 *
+	 */
 	public function iteration() {
-	/*
-		Return the iteration number. How many slides have we been through?
-	*/
-
 		return intval ( $this->slider_iteration - 1 );
 		// has_slides() always bumps the iteration ready for the next run, but we
 		// are still running, for the theme's purposes, on the previous iteration.
@@ -459,33 +587,27 @@ class Total_Slider_Widget extends WP_Widget {
 	}
 	
 		
+	/**
+	 * At editing time, this makes the title/description box draggable. It performs no action here.
+	 *
+	 * @return void
+	 *
+	 */
 	public function make_draggable() {
-	/*
-		Outputs a class that in edit-time mode makes the object draggable (for X/Y positioning
-		of the title/description overlay).
-	
-		Should be called when inside a DOM object's 'class' attribute.
-	*/
-	
+
 		// here in runtime, we do nothing
 		
 		return;
 		
 	}
 	
+	/**
+	 * At editing time, this defines the parent element for the draggable box. It performs no action here.
+	 *
+	 * @return void
+	 *
+	 */
 	public function draggable_parent() {
-	/*
-		Outputs a class that in edit-time mode makes the object the draggable's parent. This
-		will be used to calculate the X/Y offset for the title/description box.
-		
-		This element will also be used as the containment for the draggable title/description box,
-		i.e. the box will not be able to be dragged outside of the object marked with this class.
-		
-		Should be called when inside a DOM object's 'class' attribute.
-		
-		Does nothing at runtime.
-	*/
-		
 		return;
 		
 	}	

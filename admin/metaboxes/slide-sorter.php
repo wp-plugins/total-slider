@@ -6,7 +6,7 @@ Print to output the contents of the slide sorter/slide listing metabox.
 
 /* ----------------------------------------------*/
 
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
         modify it under the terms of the GNU General Public License
@@ -35,16 +35,19 @@ if ( ! function_exists( '__' ) )
 }
 
 ?><!--sortable slides-->
-<?php $current_slides = Total_Slider::get_current_slides($TS_The_Slug); ?>
+<?php $group = new Total_Slide_Group( $TS_Total_Slider->slug ); ?>
+<?php $group->load(); ?>
+<?php $current_slides = $group->get_slides(); ?>
 <div id="slidesort-container">
 <ul id="slidesort" style="width:<?php echo intval( count( $current_slides ) * 180 ); ?>px;">
 <?php
 
 if ( is_array( $current_slides ) && count( $current_slides ) > 0 ) {
 
+	
 	foreach( $current_slides as $slide ) {
 
-		$my_id = Total_Slider::id_filter( $slide['id'] );
+		$my_id = $TS_Total_Slider->id_filter( $slide['id'] );
 		
 		if ( is_numeric($slide['background'] ) )
 		{
@@ -56,13 +59,13 @@ if ( is_array( $current_slides ) && count( $current_slides ) > 0 ) {
 
 		?>
 
-		<li id="slidesort_<?php echo $my_id;?>">
+		<li id="slidesort_<?php echo $my_id;?>" class="slidesort-<?php echo esc_attr( $slide['post_status'] ); ?>">
 
 			<div class="slidesort_slidebox" style="background: url(<?php echo esc_url( $background_url );?>)">
-				<div id="slidesort_<?php echo $my_id;?>_text" class="slidesort_text"><?php echo stripslashes( esc_html( $slide['title'] ) );?></div>
+				<div id="slidesort_<?php echo $my_id;?>_text" class="slidesort_text total-slider_<?php echo esc_attr( get_locale() ); ?>"><?php echo stripslashes( esc_html( $slide['title'] ) );?></div>
 
-				<a id="slidesort_<?php echo $my_id;?>_move_button" class="slidesort-icon slide-move-button" href="#"><?php _e( 'Move', 'total_slider' );?></a>
-				<span id="slidesort_<?php echo $my_id;?>_delete" class="slide-delete"><a id="slidesort_<?php echo $my_id;?>_delete_button" class="slidesort-icon slide-delete-button" href="#"><?php _e( 'Delete', 'total_slider' );?></a></span>
+				<a id="slidesort_<?php echo $my_id;?>_move_button" class="slidesort-icon slide-move-button" href="#"><?php _e( 'Move', 'total-slider' );?></a>
+				<span id="slidesort_<?php echo $my_id;?>_delete" class="slide-delete"><a id="slidesort_<?php echo $my_id;?>_delete_button" class="slidesort-icon slide-delete-button" href="#"><?php _e( 'Delete', 'total-slider' );?></a></span>
 			</div>
 
 		</li>
@@ -77,7 +80,7 @@ if ( is_array( $current_slides ) && count( $current_slides ) > 0 ) {
 </ul>
 
 <div class="slidesort-add-hint"<?php if ( is_array( $current_slides ) && count( $current_slides ) > 0) echo ' style="display:none"'; ?>>
-<?php _e('Click &lsquo;Add New&rsquo; to create a Slide.', 'total_slider');?></div>
+<?php _e('Click &lsquo;Add New&rsquo; to create a Slide.', 'total-slider');?></div>
 
 </div>
 

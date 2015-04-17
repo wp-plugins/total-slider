@@ -1,13 +1,15 @@
 <?php
 /*
-Total Slider Data Format Upgrade Tool -- v1.0.x - v1.1
-	
-This file is invoked by Total Slider when the user has upgraded the plugin,
-to ensure that the data format has been upgraded to the latest version.
+ * Total Slider Data Format Upgrade Tool -- v1.0.x - v1.1
+ * 
+ * This file is invoked by Total Slider when the user has upgraded the plugin,
+ * to ensure that the data format has been upgraded to the latest version.
+ *
+ */
 
 /* ----------------------------------------------*/
 
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -37,7 +39,7 @@ if ( ! function_exists( '__' ) )
 
 // add the data format option
 if ( ! get_option( 'total_slider_dataformat_version' ) ) {
-	add_option( 'total_slider_dataformat_version', TOTAL_SLIDER_DATAFORMAT_VERSION );
+	add_option( 'total_slider_dataformat_version', '1.1' );
 }
 
 // set default general options, if not set (unlikely)

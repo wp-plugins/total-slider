@@ -1,14 +1,15 @@
 <?php
 /*
-
-	Slide Groups WP_List_Table subclass
-	
-	To facilitate the display of Slide Groups in a WP_List_Table on the main
-	Slide Groups screen.
+ * Slide Groups WP_List_Table subclass
+ * 
+ * To facilitate the display of Slide Groups in a WP_List_Table on the main
+ * Slide Groups screen.
+ *
+ */
 
 /* ----------------------------------------------*/
 
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -25,50 +26,69 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * Class: Extending WP_List_Table, this class provides the functions to display a WordPress admin-style table on the main Slide Groups page.
+ *
+ * @see WP_List_Table
+ */
 class Slide_Groups_Table extends WP_List_Table {
 
+	/**
+	 * Construct the LocationsTable, passing in singular and plural	labels and calling the parent constructor.
+	 *
+	 * @param array $args Arguments to create the WP_List_Table
+	 * @return array
+	 */
 	public function __construct( $args = array() ) {
 	/*
-		Construct the LocationsTable, passing in singular and plural
-		labels and calling the parent constructor.
-	*/
+		*/
 		return parent::__construct(
 		
 			array (
-				'singular' 	=> __( 'slide group', 'total_slider' ),
-				'plural'	=> __( 'slide groups', 'total_slider' ),
+				'singular' 	=> __( 'slide group', 'total-slider' ),
+				'plural'	=> __( 'slide groups', 'total-slider' ),
 				'ajax'		=> false			
 			)
 		);
 	}
 	
+	/**
+	 * Define this table's columns and their tables.
+	 *
+	 */
 	public function get_columns() {
-	/*
-		Define this table's columns and their titles.
-	*/
 	
 		return array(
 		
 	        'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text	
-			'name'		=>	__('Group Name', 'total_slider'),
-			'template'  =>	__('Template', 'total_slider'),
-			'slides_count'		=>	__('Slides', 'total_slider')
+			'name'		=>	__('Group Name', 'total-slider'),
+			'template'  =>	__('Template', 'total-slider'),
+			'slides_count'		=>	__('Slides', 'total-slider')
 		
 		);
 	
 	}
 		
+	/**
+	 * Return the list of columns, and associated entries within the result record, by which the user can sort the table.
+	 *
+	 * @return array
+	 *
+	 */
 	public function get_sortable_columns() {
-	/*
-		Return the list of columns, and associated entries
-		within the result record, that by which the user
-		can sort the table.
-	*/
 	
 		return array();
 	
 	}
 	
+	/**
+	 * Display handler for the group name (the first column).
+	 *
+	 * We need to display the name, as well as Edit/Delete inline links for this Slide Group.
+	 *
+	 * @param Total_Slide_Group $item A slide group object.
+	 * @return void
+	 */
 	public function column_name($item)
 	{
 	/*
@@ -79,27 +99,36 @@ class Slide_Groups_Table extends WP_List_Table {
 	
 		echo esc_html( stripslashes( $item->name ) );
 		?><br/><div class="row-actions">
-			<span class="edit"><a href="admin.php?page=total-slider&amp;group=<?php echo esc_attr( $item->slug ); ?>"><?php _e( 'Edit', 'total_slider' ); ?></a></span> |
+			<span class="edit"><a href="admin.php?page=total-slider&amp;group=<?php echo esc_attr( $item->slug ); ?>"><?php _e( 'Edit', 'total-slider' ); ?></a></span> |
 			<span class="trash"><a class="submitdelete" href="admin.php?page=total-slider&amp;action=remove&amp;group=<?php echo esc_attr( $item->slug ); ?>&amp;_wpnonce=<?php echo wp_create_nonce( 'remove-slide-group' );?>"
-				onclick="return confirm('<?php _e( 'Are you sure you want to delete this slide group?\n\nThis action cannot be undone.', 'total_slider' ); ?>');"
-			><?php _e( 'Remove', 'total_slider' ); ?></a></span>
+				onclick="return confirm('<?php _e( 'Are you sure you want to delete this slide group?\n\nThis action cannot be undone.', 'total-slider' ); ?>');"
+			><?php _e( 'Remove', 'total-slider' ); ?></a></span>
 		</div><?php
 	}
 	
+	/**
+	 * Gather a count of this slide group for the 'count' column.
+	 *
+	 * @param Total_Slide_Group $item A slide group object.
+	 * @return integer
+	 */
 	public function column_slides_count( $item ) {
-	/* 
-		Gather a count of this slide group for the column.
-	*/
-		
-		return count( get_option( 'total_slider_slides_' . esc_attr( $item->slug ) ) );		
+
+		$group_object = new Total_Slide_Group( $item->slug );
+		$group_object->load();
+
+		return count( $group_object->get_slides() );		
 	
 	}
 	
+	/**
+	 * Return the template name used for the slide group.
+	 *
+	 * @param Total_Slide_Group $item A slide group object.
+	 * @return string
+	 */
 	public function column_template( $item ) {
-	/*
-		Return the template name used for the slide group.	
-	*/
-		
+	
 		if (
 			property_exists( $item, 'template' ) &&
 			! empty($item->template) &&
@@ -130,17 +159,27 @@ class Slide_Groups_Table extends WP_List_Table {
 		}
 	}
 	
+	/**
+	 * The default display handler for any column that does not have its own column_name() handler.
+	 *
+	 * Return the item for display.
+	 *
+	 * @param object $item
+	 * @param string $col_name
+	 *
+	 * @return string
+	 */
 	public function column_default( $item, $col_name ) {
-	/*
-		The default display handler for any column that does
-		not have its own column_name() handler in the class.
-		
-		We should return the item for display.
-	*/
-	
+
 		return esc_html( stripslashes( $item->$col_name ) );
 	}
 	
+	/**
+	 * The display handler for the checkbox column.
+	 *
+	 * @param Total_Slide_Group $item The Slide Group object.
+	 * @return string
+	 */
 	public function column_cb( $item ) {
 		return sprintf(
 			'<input class="slide-group-checkbox" type="checkbox" name="%1$s[]" value="%2$s" />',
@@ -149,14 +188,16 @@ class Slide_Groups_Table extends WP_List_Table {
 		);
 	}
 	
+	/**
+	 * Define the bulk actions that can be performed against the table data.
+	 *
+	 * @return array
+	 *
+	 */
 	public function get_bulk_actions() {
-	/*
-		Define the bulk actions that can be performed
-		against the table data.
-	*/
 		
 		$actions = array(
-			'remove'			=> __('Remove', 'total_slider')
+			'remove'			=> __('Remove', 'total-slider')
 		);
 		
 		
@@ -164,35 +205,56 @@ class Slide_Groups_Table extends WP_List_Table {
 	}
     
 	
+	/**
+	 * Return a count for the total number of Slide Groups for pagination purposes.
+	 *
+	 * @return integer
+	 *
+	 */
 	public function get_total_items()
 	{
-	/*
-		Quickly get a count for the total number of items
-		so that we can do pagination properly.
-	*/
 	
-		return count( get_option( 'total_slider_slide_groups' ) );
+		return count( get_terms( 'total_slider_slide_group' ) );
 	
 	}
 	
+	/**
+	 * Get the Slide Groups, so we can display them in the table.
+	 *
+	 * @return array
+	 *
+	 */
 	public function get_groups()
 	{
-	/*
-		Get the slide groups from the options table, so
-		we can display them in the table.
-	*/
-	
-		$groups = get_option( 'total_slider_slide_groups' );
+
+		$args = array(
+			'hide_empty'   => false,
+		);
+
+		$groups = get_terms( 'total_slider_slide_group', $args );
+
+		// load template information
+		if ( is_array( $groups ) && count( $groups ) > 0 ) {
+			foreach( $groups as $group ) {
+				$group_object = new Total_Slide_Group( $group->slug );
+				$group_object->load();
+				$group->template = $group_object->template;
+				$group->templateLocation = $group_object->templateLocation;
+			}
+		}
+
 		return $groups;
 	
 	}
 		
+	/**
+	 * Prepare data for the table -- getting data and running accessory functions.
+	 *
+	 * @return void
+	 *
+	 */
 	public function prepare_items()
 	{
-	/*
-		Prepare data for display -- getting the data and returning
-		the data for the table.
-	*/
 	
 		$per_page = TOTAL_SLIDER_MAX_SLIDE_GROUPS;
 		
@@ -215,20 +277,23 @@ class Slide_Groups_Table extends WP_List_Table {
 		$this->set_pagination_args(array(
 		
 			'total_items'	=>	$total_items,
-			'per_page'		=>	$per_page,
+			'per_page'	=>	$per_page,
 			'total_pages'	=>	ceil( $total_items / $per_page )
 		
 		));
 			
 	}
 	
+	/**
+	 * Return the text to display if there are no Slide Groups.
+	 *
+	 * @return string
+	 *
+	 */
 	public function no_items()
 	{
-	/*
-		Return the text to display when there are no items.	
-	*/
 	
-		echo __( 'Click &lsquo;Add New&rsquo; to create a new group of slides.', 'total_slider' );
+		echo __( 'Click &lsquo;Add New&rsquo; to create a new group of slides.', 'total-slider' );
 	
 	}
 	
