@@ -1,12 +1,14 @@
 <?php
 /*
-Slide Preview metabox
-
-Print to output the contents of the slide preview metabox. 
+ * Slide Preview metabox
+ * 
+ * Print to output the contents of the slide preview metabox. 
+ *
+ */
 
 /* ----------------------------------------------*/
 
-/*  Copyright (C) 2011-2014 Peter Upfold.
+/*  Copyright (C) 2011-2015 Peter Upfold.
 
     This program is free software; you can redistribute it and/or
         modify it under the terms of the GNU General Public License
@@ -58,23 +60,23 @@ if ( ! function_exists( '__' ) )
 	<script id="slide-ejs" type="text/ejs">
 	<?php
 	
-	if ( ! $TS_The_Template || ! is_a( $TS_The_Template, 'Total_Slider_Template' ) ) {	
+	if ( ! $TS_Total_Slider->template || ! is_a( $TS_Total_Slider->template, 'Total_Slider_Template' ) ) {	
 		// determine the current template
-		if ( ! Total_Slider::determineTemplate() ) {
+		if ( ! $this->determineTemplate() ) {
 			?><div class="template-render-error"><?php
-			_e( 'Unable to load the preview.', 'total_slider' );
+			_e( 'Unable to load the preview.', 'total-slider' );
 			?></div><?php
 		}
 	}
 	
-	if ( is_a( $TS_The_Template, 'Total_Slider_Template' ) ) {
+	if ( is_a( $TS_Total_Slider->template, 'Total_Slider_Template' ) ) {
 		try {
-			echo $TS_The_Template->render();
+			echo $TS_Total_Slider->template->render();
 		}
 		catch ( Exception $e )
 		{
 			?><div class="template-render-error"><?php
-			_e( 'Unable to load the preview.', 'total_slider' );
+			_e( 'Unable to load the preview.', 'total-slider' );
 			?><br />
 			<em><?php echo esc_html( $e->getMessage() ); ?></em>
 			</div><?php					
