@@ -3,8 +3,8 @@ Contributors: PeterUpfold, VanPattenMedia
 Donate link: http://www.totalslider.com/donate/
 Tags: slider, slideshow, rotation, rotator
 Requires at least: 4.0
-Tested up to: 4.1.1
-Stable tag: 2.0 
+Tested up to: 4.2.2
+Stable tag: 2.0.1
 License: GPLv2 or later
 
 Transform your experience with sliders forever. A beautiful, true WYSIWYG interface designed to blend seamlessly with the WordPress core.
@@ -58,6 +58,11 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 
 == Changelog ==
 
+= 2.0.1 =
+* Fixes some uncommon issues that may cause slides to become orphaned during an upgrade.
+* Fixes any slides that have become orphaned due to the issue above, re-connecting them to their slide groups.
+* Fix for issue where a slide with a blank description would display the previous slide's description (reported by [Rachel on WP.org Support Forums](https://wordpress.org/support/profile/rleggett))
+
 = 2.0 =
 * Major new release, featuring drafts, auto-saving drafts and improved behind-the-scenes data storage.
 
@@ -103,6 +108,10 @@ Go to **Appearance** > **Widgets** in WordPress and drag a new Total Slider widg
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+
+Fixes various bugs, including orphaned slides during v1.1.x -> v2.0 upgrades.
 
 = 2.0 =
 
